@@ -1,36 +1,56 @@
 class World {
 
     character = new Character();
-    enemy = [
-    new PufferFish(),
-    new PufferFish(),
-    new PufferFish()
-    ];
-    backgroundObject = [
-        new BackgroundObject('img/3. Background/Layers/5. Water/L1.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/1. Light/COMPLETO.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/1. Light/1.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/1. Light/2.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/3.Fondo 1/D.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/4.Fondo 2/D.png', 0, 0),
-        new BackgroundObject('img/3. Background/Layers/2. Floor/D.png', 0, 0)
-    ]
+    level = level1;
     ctx;
     canvas;
+    keyboard;
+    camera_x = -100;
 
-    constructor(canvas) {
+    constructor(canvas , keyboard) {
         this.ctx = canvas.getContext('2d');
+        this.setWorld();
         this.canvas = canvas;
+        this.keyboard = keyboard;
         this.draw();
+        this.checkCollisions();
+    }
+
+    setWorld() {
+        this.character.world = this;
+        // Endboss-Referenz auf World setzen
+        if (this.level && this.level.enemies) {
+            this.level.enemies.forEach(e => {
+                if (e.constructor && e.constructor.name === 'Endboss') {
+                    e.world = this;
+                }
+            });
+        }
+    }
+
+    checkCollisions() {
+        setInterval(() => {
+            // Check collision with enemies
+            this.level.enemies.forEach(enemy => {
+                if (this.character.isColliding(enemy)) {
+                    //this.character.hit();
+                    console.log('Character hit by enemy!');
+                }
+            });
+        }, 100);
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear canvas
-        
-        this.drawMultipleObjects(this.backgroundObject);
+
+        this.ctx.translate(this.camera_x, 0); // camera movement
+
+        this.drawMultipleObjects(this.level.backgroundObjects);
         this.drawObject(this.character);
-        this.drawMultipleObjects(this.enemy);
-        
+        this.drawMultipleObjects(this.level.enemies);
+
+
+        this.ctx.translate(-this.camera_x, 0); // reset camera
 
         requestAnimationFrame(() => this.draw());
     }
@@ -42,7 +62,19 @@ class World {
     }
 
     drawObject(movableObject) {
-        this.ctx.drawImage(movableObject.img, movableObject.x, movableObject.y, movableObject.width, movableObject.height);
+        if(movableObject.otherDirection) {
+            this.ctx.save();
+            this.ctx.translate(movableObject.x + movableObject.width / 2, 0);
+            this.ctx.scale(-1, 1);
+            this.ctx.translate(-(movableObject.x + movableObject.width / 2), 0);
+            this.ctx.drawImage(movableObject.img, movableObject.x, movableObject.y, movableObject.width, movableObject.height);
+            this.ctx.restore();
+            movableObject.drawFrame(this.ctx);
+            return;
+            
+        }
+        movableObject.draw(this.ctx);
+        movableObject.drawFrame(this.ctx);
     }
 
 

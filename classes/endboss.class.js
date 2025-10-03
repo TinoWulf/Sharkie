@@ -4,6 +4,12 @@ class Endboss extends MovableObject {
     currentImageIndex = 0;
     introduced = false;
 
+    offset = { top: 20,
+               bottom: 20,
+               left: 30,
+               right: 30
+    }
+
     imagesEndboss = {
         introduce: [
             'img/2.Enemy/3 Final Enemy/1.Introduce/1.png',

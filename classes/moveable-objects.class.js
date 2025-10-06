@@ -1,8 +1,9 @@
 class MovableObject extends DrawableObject {
 
     otherDirection = false;
-    energy = 100;
     lastHit = 0;
+    gravity = 2; // pixels per tick^2, just a start value
+    speedY = 0;
 
     getHitbox() {
         return {
@@ -26,7 +27,7 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
-        this.energy -= 5;
+        this.energy -= 20;
         if (this.energy < 0) {
             this.energy = 0;
         }
@@ -58,4 +59,27 @@ class MovableObject extends DrawableObject {
             this.x -= speed; // move left by 'speed' pixels every 1/60 second
         }, 1000 / 60); // 60 frames per second
     }
+
+
+    isAboveCharacter() {        
+        return this.world.character.y + this.world.character.height - this.height;
+    }
+
+
+    applyGravity() {
+    setInterval(() => {
+        console.log(this.speedY);
+        
+        if (this.y < this.isAboveCharacter()) {
+            this.y += this.speedY;
+            this.speedY += this.gravity;
+        } else {
+            this.y = this.isAboveCharacter();
+            this.speedY = 0;
+        }
+    }, 1000 / 25);
+}
+
+
+
 }

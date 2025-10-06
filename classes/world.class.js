@@ -7,6 +7,7 @@ class World {
     keyboard;
     camera_x = -100;
     statusBar = new StatusBar();
+    throwableObject = [new Throwable()];
 
     constructor(canvas , keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -18,24 +19,30 @@ class World {
     }
 
     setWorld() {
-        this.character.world = this;
-        // Endboss-Referenz auf World setzen
-        if (this.level && this.level.enemies) {
-            this.level.enemies.forEach(e => {
-                if (e.constructor && e.constructor.name === 'Endboss') {
-                    e.world = this;
-                }
-            });
-        }
+    this.character.world = this;
+
+    if (this.level && this.level.enemies) {
+        this.level.enemies.forEach(e => {
+            e.world = this;
+        });
     }
+
+    if (this.throwableObject) {
+        this.throwableObject.forEach(obj => {
+            obj.world = this;
+        });
+    }
+}
+
 
     checkCollisions() {
         setInterval(() => {
             // Check collision with enemies
             this.level.enemies.forEach(enemy => {
-                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.isHurt) {
-                    this.character.hit(); 
-                    
+                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
+                    this.character.hit();
+                    // update status bar with the character's current energy after hit
+                    this.statusBar.setPercentage(this.character.energy);
                     console.log('Character energy: ' + this.character.energy);
                 }
             });
@@ -52,7 +59,7 @@ class World {
         this.ctx.translate(this.camera_x, 0);
         this.drawObject(this.character);
         this.drawMultipleObjects(this.level.enemies);
-
+        this.drawMultipleObjects(this.throwableObject);
 
         this.ctx.translate(-this.camera_x, 0); // reset camera
 

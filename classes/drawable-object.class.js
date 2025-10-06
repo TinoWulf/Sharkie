@@ -6,6 +6,7 @@ class DrawableObject {
     y = 100;
     height = 150;
     width = 100;
+    energy = 100;
 
 
     loadImage(path) {

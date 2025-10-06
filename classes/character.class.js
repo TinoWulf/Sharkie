@@ -112,7 +112,7 @@ class Character extends MovableObject {
     
     animate() {
         setInterval(() => {
-            if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt) {
+            if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt()) {
             this.playAnimation(this.imagesCharacter.swimming);
         }
 

@@ -28,8 +28,9 @@ class StatusBar extends DrawableObject {
     }
 
     height = 50;
-    width = 250;
-
+    width = 200;
+    x = 20;
+    y = 0;
     percantage = 100;
 
     constructor() {
@@ -48,23 +49,13 @@ class StatusBar extends DrawableObject {
     }
 
     returnImageIndex() {
-        if(this.percantage ==100) {
-            return 5;
-        }
-        else if (this.percantage > 80) {
-            return 4;
-        }
-        else if (this.percantage > 60) {
-            return 4;
-        }
-        else if (this.percantage > 40) {
-            return 4;
-        }
-        else if (this.percantage > 20) {
-            return 4;
-        }
-        else {
-            return 0;
-        }
+        // Map percentage (0-100) to image index (0..5)
+        if (!this.percantage && this.percantage !== 0) this.percantage = 100;
+        if (this.percantage >= 100) return 5;
+        if (this.percantage >= 80) return 4;
+        if (this.percantage >= 60) return 3;
+        if (this.percantage >= 40) return 2;
+        if (this.percantage >= 20) return 1;
+        return 0;
     }
 }

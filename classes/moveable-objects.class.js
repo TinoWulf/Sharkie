@@ -4,6 +4,7 @@ class MovableObject extends DrawableObject {
     lastHit = 0;
     gravity = 2; // pixels per tick^2, just a start value
     speedY = 0;
+    keyboard;
 
     getHitbox() {
         return {
@@ -27,9 +28,9 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
-        this.energy -= 20;
-        if (this.energy < 0) {
-            this.energy = 0;
+        this.health -= 20;
+        if (this.health < 0) {
+            this.health = 0;
         }
         else {
             this.lastHit = new Date().getTime();
@@ -44,7 +45,7 @@ class MovableObject extends DrawableObject {
     }
 
     isDead() {
-        return this.energy == 0;
+        return this.health == 0;
     }
 
     playAnimation(images) {
@@ -60,25 +61,18 @@ class MovableObject extends DrawableObject {
         }, 1000 / 60); // 60 frames per second
     }
 
-
-    isAboveCharacter() {        
-        return this.world.character.y + this.world.character.height - this.height;
+    moveRight(speed) {
+        setInterval(() => {
+            this.x += speed; // move right by 'speed' pixels every 1/60 second
+        }, 1000 / 60); // 60 frames per second
     }
 
-
     applyGravity() {
-    setInterval(() => {
-        console.log(this.speedY);
-        
-        if (this.y < this.isAboveCharacter()) {
-            this.y += this.speedY;
-            this.speedY += this.gravity;
-        } else {
-            this.y = this.isAboveCharacter();
-            this.speedY = 0;
-        }
-    }, 1000 / 25);
-}
+        setInterval(() => {
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+        }, 1000 / 25);
+    }
 
 
 

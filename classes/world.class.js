@@ -5,9 +5,26 @@ class World {
     ctx;
     canvas;
     keyboard;
+    speedLever = 0;
     camera_x = -100;
-    statusBar = new StatusBar();
+    statusBar = [new StatusBar('life', 10, 0, 50, 200),
+                 new StatusBar('coins', 10, 40, 50, 200),
+                 new StatusBar('poison', 10, 80, 50, 200),
+                 new StatusBar('instructions', 0, 330, 150, 300)
+    ];
     throwableObject = [new Throwable()];
+    collectableObjects = [new Collectable(400, 300, 'coin'),
+        new Collectable(800, 200, 'coin'),
+        new Collectable(1200, 350, 'coin'),
+        new Collectable(1600, 250, 'coin'),
+        new Collectable(300, 400, 'life'),
+        new Collectable(400, 400, 'life'),
+        new Collectable(500, 400, 'life'),
+        new Collectable(600, 400, 'poison'),
+        new Collectable(700, 400, 'poison'),
+        new Collectable(800, 400, 'poison')
+
+    ];
 
     constructor(canvas , keyboard) {
         this.ctx = canvas.getContext('2d');
@@ -16,37 +33,111 @@ class World {
         this.keyboard = keyboard;
         this.draw();
         this.checkCollisions();
+        this.run();
     }
 
     setWorld() {
     this.character.world = this;
 
-    if (this.level && this.level.enemies) {
-        this.level.enemies.forEach(e => {
-            e.world = this;
+        if (this.level && this.level.enemies) {
+            this.level.enemies.forEach(e => {
+                e.world = this;
+            });
+        }
+
+        if (this.throwableObject) {
+            this.throwableObject.forEach(obj => {
+                obj.world = this;
+            });
+        }
+    }
+
+    run() {
+        setInterval(() => {
+            this.checkCollisions();
+            this.popup();
+            
+        }, 1000 / 60); // 60 frames per second
+    }
+
+    popup() {
+        this.level.enemies.forEach(pufferFish => {
+            if (pufferFish.x < this.character.x + 500) {
+                pufferFish.blownUp = true;
+                pufferFish.offset.top = 5;
+                pufferFish.offset.bottom = 5;
+                pufferFish.offset.left = 10;
+                if (Math.random() < 1 / 3) {
+                    const speedLever = Math.random() * 1.5;
+                    pufferFish.moveLeft(0.5 + speedLever);
+                } else {
+                    // Normalgeschwindigkeit
+                    pufferFish.moveLeft(0.5);
+                }
+            }
         });
     }
 
-    if (this.throwableObject) {
-        this.throwableObject.forEach(obj => {
-            obj.world = this;
-        });
-    }
-}
+    checkThrowableObjects() {
 
+            let throwX, throwY;
+            if (this.character.otherDirection) {
+                throwX = this.character.getHitbox().x;
+                throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2;
+            } else {
+                throwX = this.character.getHitbox().x + this.character.getHitbox().width - 10;
+                throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2 - 12 ;
+            }
+
+            const t = new Throwable(throwX, throwY);
+            t.otherDirection = this.character.otherDirection; // <- hier übernehmen!
+            this.throwableObject.push(t);
+
+        
+        this.keyboard.SPACE = false;
+        
+    }
 
     checkCollisions() {
-        setInterval(() => {
-            // Check collision with enemies
-            this.level.enemies.forEach(enemy => {
-                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
-                    this.character.hit();
-                    // update status bar with the character's current energy after hit
-                    this.statusBar.setPercentage(this.character.energy);
-                    console.log('Character energy: ' + this.character.energy);
+        this.level.enemies.forEach(enemy => {
+            if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
+                this.character.hit();
+                // update status bar with the character's current health after hit
+                this.statusBar[0].setHealth(this.character.health);
+            }
+        });
+
+        for (let i = this.throwableObject.length - 1; i >= 0; i--) {
+            for (let j = this.level.enemies.length - 1; j >= 0; j--) {
+                if (this.throwableObject[i].isColliding(this.level.enemies[j])) {
+                    // Entferne das getroffene Objekt und den Gegner
+                    this.throwableObject.splice(i, 1);
+                    this.level.enemies[j].isDeadPufferFish();
+                    setTimeout(() => {
+                        this.level.enemies.splice(j, 1);
+                    }, 500);
+                    break; // Nur ein Enemy pro Wurf entfernen
                 }
-            });
-        }, 100);
+            }
+        }
+
+        this.collectableObjects.forEach(collectable => {
+            if (this.character.isColliding(collectable) && !collectable.collected) {
+                if (collectable.imageType.coin.includes('Coin') || collectable.constructor.name === 'Collectable' && collectable.type === 'coin') {
+                    this.statusBar[1].setCoins(this.statusBar[1].coins + 20);
+                    collectable.collected = true;
+                    console.log('Coin collected!');
+                }
+                else if (collectable.imageType.life.includes('Life') || collectable.type === 'life') {
+                    this.statusBar[0].setHealth(this.statusBar[0].health + 20);
+                    collectable.collected = true;
+                }
+                else if (collectable.imageType.poison.includes('poison') || collectable.type === 'poison') {
+                    this.statusBar[2].setPoison(this.statusBar[2].poison + 20);
+                    collectable.collected = true;
+                }
+            }
+        });
     }
 
     draw() {
@@ -55,11 +146,12 @@ class World {
 
         this.drawMultipleObjects(this.level.backgroundObjects);
         this.ctx.translate(-this.camera_x, 0);
-        this.drawObject(this.statusBar);
+        this.drawMultipleObjects(this.statusBar);
         this.ctx.translate(this.camera_x, 0);
         this.drawObject(this.character);
         this.drawMultipleObjects(this.level.enemies);
         this.drawMultipleObjects(this.throwableObject);
+        this.drawMultipleObjects(this.collectableObjects);
 
         this.ctx.translate(-this.camera_x, 0); // reset camera
 
@@ -87,6 +179,5 @@ class World {
         movableObject.draw(this.ctx);
         movableObject.drawFrame(this.ctx);
     }
-
 
 }

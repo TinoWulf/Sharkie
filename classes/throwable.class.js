@@ -1,25 +1,33 @@
 class Throwable extends MovableObject {
     height = 30;
     width = 30;
-    x = 100;
-    y = 100;
-    
+    otherDirection = false;
+    offset = {  top: 5,
+                bottom: 5,
+                left: 5,
+                right: 5
+    };
+        
 
-    constructor() {
+    constructor(x, y, otherDirection) {
         super().loadImage('img/1.Sharkie/4.Attack/Bubble trap/Bubble.png');
-        //this.animate();
-        //this.moveRight(this.speedx);
-        this.throw(this.x, this.y);
+        this.x = x;
+        this.y = y;
+        this.otherDirection = otherDirection;
+        this.throw();
     }
 
-    throw(x, y) {
+    
+
+    throw() {
+        this.speedY = -20;
+        this.applyGravity();
         setInterval(() => {
-        if (this.world.keyboard.SPACE) {
-            this.x = x;
-            this.y = y;
-            this.speedY = 15;
-            this.applyGravity();
-        } 
-    }, 1000 / 25);       
+            if (this.otherDirection) {
+                this.x -= 10;
+            } else {
+                this.x += 10;
+            }
+        }, 25);
     }
 }

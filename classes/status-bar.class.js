@@ -24,38 +24,83 @@ class StatusBar extends DrawableObject {
             'img/4. Marcadores/green/poisoned bubbles/60_ copia 2.png',
             'img/4. Marcadores/green/poisoned bubbles/80_ copia 2.png',
             'img/4. Marcadores/green/poisoned bubbles/100_ copia 3.png'
+        ],
+        instructions : [
+            'img/6.Botones/Instructions 2.png'
         ]
     }
 
-    height = 50;
-    width = 200;
-    x = 20;
-    y = 0;
-    percantage = 100;
+    health = 100;
+    coins = 0;
+    poison = 0;
+    type; // 'life', 'coins', 'poison', 'instructions'
 
-    constructor() {
+    constructor(type, x, y, height, width) {
         super();
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.height = height;
+        this.width = width;
         this.loadImages(this.statusImages.coins);
         this.loadImages(this.statusImages.life);
         this.loadImages(this.statusImages.poison);
-        this.setPercentage(100);
+        this.loadImages(this.statusImages.instructions);
+        this.checkType();
     }
 
-    setPercentage(percantage) {
-        this.percantage = percantage
-        let imagePath = this.statusImages.life[this.returnImageIndex()];
-        this.img = this.imageCache[imagePath];
-        
+    checkType() {
+        switch (this.type) {
+        case 'life':
+            this.setHealth(100);
+            break;
+        case 'coins':
+            this.setCoins(0);
+            break;
+        case 'poison':
+            this.setPoison(0);
+            break;
+        case 'instructions':
+            this.setInstructions();
+            break;
+        }
     }
 
-    returnImageIndex() {
-        // Map percentage (0-100) to image index (0..5)
-        if (!this.percantage && this.percantage !== 0) this.percantage = 100;
-        if (this.percantage >= 100) return 5;
-        if (this.percantage >= 80) return 4;
-        if (this.percantage >= 60) return 3;
-        if (this.percantage >= 40) return 2;
-        if (this.percantage >= 20) return 1;
+    setInstructions() {
+        let images = this.statusImages[this.type];
+        let path = images[0];
+        this.img = this.imageCache[path];
+    }
+
+    setPoison(poison) {
+        this.poison = poison
+        let images = this.statusImages[this.type];
+        let path = images[this.returnImageIndex(this.poison)];
+        this.img = this.imageCache[path];
+    }
+
+    setCoins(coins) {
+        this.coins = coins
+        let images = this.statusImages[this.type];
+        let path = images[this.returnImageIndex(this.coins)];
+        this.img = this.imageCache[path];
+    }
+
+    setHealth(health) {
+        this.health = health
+        let images = this.statusImages[this.type];
+        let path = images[this.returnImageIndex(this.health)];
+        this.img = this.imageCache[path];
+    }
+
+    returnImageIndex(type) {
+        // Map health (0-100) to image index (0..5)
+        if (!type && type !== 0) type = 100;
+        if (type >= 100) return 5;
+        if (type >= 80) return 4;
+        if (type >= 60) return 3;
+        if (type >= 40) return 2;
+        if (type >= 20) return 1;
         return 0;
     }
 }

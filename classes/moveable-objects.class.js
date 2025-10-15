@@ -56,9 +56,7 @@ class MovableObject extends DrawableObject {
     }
 
     moveLeft(speed) {
-        setInterval(() => {
             this.x -= speed; // move left by 'speed' pixels every 1/60 second
-        }, 1000 / 60); // 60 frames per second
     }
 
     moveRight(speed) {
@@ -68,10 +66,8 @@ class MovableObject extends DrawableObject {
     }
 
     applyGravity() {
-        setInterval(() => {
                 this.y += this.speedY;
                 this.speedY += this.gravity;
-        }, 1000 / 25);
     }
 
 

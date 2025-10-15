@@ -1,12 +1,13 @@
 class World {
 
     character = new Character();
-    level = level1;
+    level = createLevel1();
     ctx;
     canvas;
     keyboard;
     speedLever = 0;
     camera_x = -100;
+    gameOver = false;
     statusBar = [new StatusBar('life', 10, 0, 50, 200),
                  new StatusBar('coins', 10, 40, 50, 200),
                  new StatusBar('poison', 10, 80, 50, 200),
@@ -33,18 +34,20 @@ class World {
         this.keyboard = keyboard;
         this.draw();
         this.checkCollisions();
-        this.run();
+        this.character.world = this;
+        setStoppableIntervals(() => this.character.moveCharacter(), 1000 / 60);
+        setStoppableIntervals(() => this.character.animate(), 100);
+        setStoppableIntervals(() => this.run(), 1000 / 60);
     }
 
     setWorld() {
     this.character.world = this;
-
-        if (this.level && this.level.enemies) {
-            this.level.enemies.forEach(e => {
-                e.world = this;
-            });
+    this.level.enemies.forEach(e => {
+        e.world = this;
+        if (e instanceof Endboss) {
+            setStoppableIntervals(() => e.animate(), 1000 / 6);
         }
-
+    });
         if (this.throwableObject) {
             this.throwableObject.forEach(obj => {
                 obj.world = this;
@@ -53,33 +56,31 @@ class World {
     }
 
     run() {
-        setInterval(() => {
-            this.checkCollisions();
-            this.popup();
-            
-        }, 1000 / 60); // 60 frames per second
+        this.checkCollisions();
+        this.popup();
+        this.checkGameOver();
+    }
+
+    checkGameOver() {
+        if (!this.gameOver && this.character.dead) {
+            endGame();
+            this.gameOver = true;
+        }
     }
 
     popup() {
         this.level.enemies.forEach(pufferFish => {
-            if (pufferFish.x < this.character.x + 500) {
+            if (pufferFish.x < this.character.x + 400) {
                 pufferFish.blownUp = true;
                 pufferFish.offset.top = 5;
                 pufferFish.offset.bottom = 5;
                 pufferFish.offset.left = 10;
-                if (Math.random() < 1 / 3) {
-                    const speedLever = Math.random() * 1.5;
-                    pufferFish.moveLeft(0.5 + speedLever);
-                } else {
-                    // Normalgeschwindigkeit
-                    pufferFish.moveLeft(0.5);
-                }
+                
             }
         });
     }
 
     checkThrowableObjects() {
-
             let throwX, throwY;
             if (this.character.otherDirection) {
                 throwX = this.character.getHitbox().x;
@@ -90,19 +91,15 @@ class World {
             }
 
             const t = new Throwable(throwX, throwY);
-            t.otherDirection = this.character.otherDirection; // <- hier übernehmen!
+            t.otherDirection = this.character.otherDirection;
             this.throwableObject.push(t);
-
-        
-        this.keyboard.SPACE = false;
-        
+           
     }
 
     checkCollisions() {
         this.level.enemies.forEach(enemy => {
             if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
                 this.character.hit();
-                // update status bar with the character's current health after hit
                 this.statusBar[0].setHealth(this.character.health);
             }
         });
@@ -110,13 +107,12 @@ class World {
         for (let i = this.throwableObject.length - 1; i >= 0; i--) {
             for (let j = this.level.enemies.length - 1; j >= 0; j--) {
                 if (this.throwableObject[i].isColliding(this.level.enemies[j])) {
-                    // Entferne das getroffene Objekt und den Gegner
                     this.throwableObject.splice(i, 1);
-                    this.level.enemies[j].isDeadPufferFish();
+                    this.level.enemies[j].dead = true;
                     setTimeout(() => {
                         this.level.enemies.splice(j, 1);
                     }, 500);
-                    break; // Nur ein Enemy pro Wurf entfernen
+                    break;
                 }
             }
         }
@@ -126,7 +122,6 @@ class World {
                 if (collectable.imageType.coin.includes('Coin') || collectable.constructor.name === 'Collectable' && collectable.type === 'coin') {
                     this.statusBar[1].setCoins(this.statusBar[1].coins + 20);
                     collectable.collected = true;
-                    console.log('Coin collected!');
                 }
                 else if (collectable.imageType.life.includes('Life') || collectable.type === 'life') {
                     this.statusBar[0].setHealth(this.statusBar[0].health + 20);

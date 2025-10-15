@@ -71,7 +71,29 @@ class Character extends MovableObject {
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/7.png',
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/8.png'
             ]
-        }
+        },
+        fallAsleep : [
+            'img/1.Sharkie/2.Long_IDLE/i1.png',
+            'img/1.Sharkie/2.Long_IDLE/I2.png',
+            'img/1.Sharkie/2.Long_IDLE/I3.png',
+            'img/1.Sharkie/2.Long_IDLE/I4.png',
+            'img/1.Sharkie/2.Long_IDLE/I5.png',
+            'img/1.Sharkie/2.Long_IDLE/I6.png',
+            'img/1.Sharkie/2.Long_IDLE/I7.png',
+            'img/1.Sharkie/2.Long_IDLE/I8.png',
+            'img/1.Sharkie/2.Long_IDLE/I9.png',
+            'img/1.Sharkie/2.Long_IDLE/I10.png',
+            'img/1.Sharkie/2.Long_IDLE/I11.png',
+            'img/1.Sharkie/2.Long_IDLE/I12.png',
+            'img/1.Sharkie/2.Long_IDLE/I13.png',
+            'img/1.Sharkie/2.Long_IDLE/I14.png'
+        ],
+        sleeping : [
+            'img/1.Sharkie/2.Long_IDLE/I11.png',
+            'img/1.Sharkie/2.Long_IDLE/I12.png',
+            'img/1.Sharkie/2.Long_IDLE/I13.png',
+            'img/1.Sharkie/2.Long_IDLE/I14.png'
+        ]
 
     }
 
@@ -80,7 +102,8 @@ class Character extends MovableObject {
         left: 40,
         right: 40
     }
-
+    lastKeyPressTime = 0;
+    sleepInterval = null;
     currentImageIndex = 0;
     height = 250;
     width = 180;
@@ -89,6 +112,9 @@ class Character extends MovableObject {
     world;
     dead = false;
     isAttacking = false;
+    waitingForAttack = false;
+    isSleeping = false;
+    isFallingAsleep = false;
 
 
     constructor() {
@@ -98,82 +124,114 @@ class Character extends MovableObject {
         this.loadImages(this.imagesCharacter.hurtPoisoned);
         this.loadImages(this.imagesCharacter.dead);
         this.loadImages(this.imagesCharacter.attack.bubble);
-        this.moveCharacter();
-        this.animate();
+        this.loadImages(this.imagesCharacter.fallAsleep);
+        this.loadImages(this.imagesCharacter.sleeping);
+        this.lastKeyPressTime = new Date().getTime();
     }
 
-
     moveCharacter() {
+        let kb = this.world.keyboard;
 
-        setInterval(() => {
-            if (this.world.keyboard.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
-                this.x += 3;
-                this.otherDirection = false;
+        if (kb.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
+            this.x += 3;
+            this.otherDirection = false;
+        }
+        if (kb.LEFT && this.x > 100  && !this.isDead()) {
+            this.x -= 3;
+            this.otherDirection = true;
+        }
+        if (kb.UP  && this.y > -100 && !this.isDead()) {
+            this.y -= 2;
+        }
+        if (kb.DOWN && this.y < this.world.canvas.height - this.height + 50 && !this.isDead()) {
+            this.y += 2;
+        }
+        if (!kb.RIGHT && !kb.LEFT && !kb.UP && !kb.DOWN && !this.isDead() && !this.isAttacking && !this.isHurt()) {
+            let currentTime = new Date().getTime();
+            let timeSinceLastKeyPress = currentTime - this.lastKeyPressTime;
+            if (timeSinceLastKeyPress > 10000 && !this.isFallingAsleep && !this.isSleeping && !this.isDead() && !this.isAttacking) {
+                this.isFallingAsleep = true;
             }
-            if (this.world.keyboard.LEFT && this.x > 100  && !this.isDead()) {
-                this.x -= 3;
-                this.otherDirection = true;
-            }
-            if (this.world.keyboard.UP  && this.y > -140 && !this.isDead()) {
-                this.y -= 2;
-            }
-            if (this.world.keyboard.DOWN && this.y < this.world.canvas.height - this.height + 50 && !this.isDead()) {
-                this.y += 2;
-            }
-            this.world.camera_x = -this.x + 100; // camera follows character
-        }, 1000 / 60); // 60 frames per second
+        } else {
+            this.lastKeyPressTime = new Date().getTime();
+            this.isFallingAsleep = false;
+            this.isSleeping = false;
+        }
+        this.world.camera_x = -this.x + 100; // camera follows character
     }
     
     animate() {
-        setInterval(() => {
+        // --- ATTACK START ---
+        if (this.world.keyboard.SPACE && !this.isHurt() && !this.isDead() && !this.isAttacking && !this.waitingForAttack) {
+            this.isAttacking = true;
+            this.waitingForAttack = true;
+            this.currentImageIndex = 0;
+            this.playAttackAnimation();
+            setTimeout(() => {
+                this.world.checkThrowableObjects();
+            }, 350);
+        }
 
-            // --- ATTACK START ---
-            if (this.world.keyboard.SPACE && !this.isHurt() && !this.isDead() && !this.isAttacking) {
-                this.isAttacking = true; // Angriff starten
-                this.currentImageIndex = 0; // Animation von vorne
-                this.playAttackAnimation();
-                setTimeout(() => {
-                    this.world.checkThrowableObjects();
-                }, 350); // Verzögerung, damit die Blase zur richtigen Zeit geworfen wird
-            }
-
-            // --- BEWEGUNG / ZUSTÄNDE ---
-            else if (!this.isAttacking) {
-                if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt()) {
-                    this.playAnimation(this.imagesCharacter.swimming);
-                } else if (this.isDead() && !this.dead) {
-                    this.playAnimation(this.imagesCharacter.dead);
-                    if (this.currentImageIndex % this.imagesCharacter.dead.length === this.imagesCharacter.dead.length - 1) {
-                        this.dead = true;
-                        this.currentImageIndex = 0;
-                    }
-                } else if (this.dead) {
-                    this.playAnimation(this.imagesCharacter.stillDead);
-                } else if (this.isHurt()) {
-                    this.playAnimation(this.imagesCharacter.hurtPoisoned);
-                } else {
-                    this.playAnimation(this.imagesCharacter.standing);
+        else if (!this.isAttacking) {
+            if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
+                this.playAnimation(this.imagesCharacter.swimming);
+            } else if (this.isDead() && !this.dead) {
+                this.playAnimation(this.imagesCharacter.dead);
+                if (this.currentImageIndex % this.imagesCharacter.dead.length === this.imagesCharacter.dead.length - 1) {
+                    this.dead = true;
+                    this.currentImageIndex = 0;
                 }
+            } else if (this.dead) {
+                this.playAnimation(this.imagesCharacter.stillDead);
+            } else if (this.isFallingAsleep && !this.isSleeping) {
+                this.playAnimation(this.imagesCharacter.fallAsleep);
+                if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
+                    this.isSleeping = true;
+                    this.isFallingAsleep = false;
+                    this.currentImageIndex = 0;
+                    this.playSleepingAnimationSlow();
+                }
+            } else if (this.isHurt()) {
+                this.playAnimation(this.imagesCharacter.hurtPoisoned);
+            } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
+                this.playAnimation(this.imagesCharacter.standing);
             }
-        }, 1000 / 10); // 10 FPS für normale Animationen
+        }
     }
+
+    playSleepingAnimationSlow() {
+        if (this.sleepInterval) {
+            clearInterval(this.sleepInterval);
+            this.sleepInterval = null;
+        }
+
+        this.sleepInterval = setInterval(() => {
+            if (this.isSleeping) {
+                this.playAnimation(this.imagesCharacter.sleeping);
+            } else {
+                clearInterval(this.sleepInterval);
+                this.sleepInterval = null;
+            }
+        }, 1000 / 5);
+    }
+
 
 
     playAttackAnimation() {
     const frames = this.imagesCharacter.attack.bubble;
     let i = 0;
-
     const attackInterval = setInterval(() => {
         this.loadImage(frames[i]);
         i++;
-
-        // Wenn die Animation fertig ist:
         if (i >= frames.length) {
             clearInterval(attackInterval);
-            this.isAttacking = false; // Angriff beendet
+            this.isAttacking = false; 
             this.currentImageIndex = 0;
+            setTimeout(() => {
+                this.waitingForAttack = false;
+            }, 1000);
         }
-    }, 50); // 100 ms pro Frame → ca. 10 FPS
+    }, 50);
 }
 
 

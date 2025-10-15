@@ -1,5 +1,5 @@
 class PufferFish extends MovableObject {
-
+    
     imagesPufferFish = {
         swimming : [
             'img/2.Enemy/1.Puffer fish (3 color options)/1.Swim/1.swim1.png',
@@ -32,56 +32,41 @@ class PufferFish extends MovableObject {
     currentImageIndex = 0;
     height = 100;
     width = 100;
+    dead = false;
+    blownUp = false;
+    blownSwimming = false;
     offset = {  top: 15,
                 bottom: 35,
                 left: 10,
                 right: 20
         };
-    dead = false;
-    blownUp = false;
-    blownSwimming = false;
 
-    constructor() {
+    constructor(x) {
         super().loadImage('img/2.Enemy/1.Puffer fish (3 color options)/1.Swim/1.swim1.png');
+        setStoppableIntervals(() => this.animate(), 1000 / 6);
+        setStoppableIntervals(() => this.moveLeft(this.speed), 1000 / 60);
         this.speed = 0.5 + Math.random() * 1;  //random speed between 0.5 and 1.5
         this.loadImages(this.imagesPufferFish.swimming);
         this.loadImages(this.imagesPufferFish.dead);
         this.loadImages(this.imagesPufferFish.blowing);
         this.loadImages(this.imagesPufferFish.swimmingBlowed);
-        this.animate();
-        this.moveLeft(this.speed);
-        this.x = 1200 + Math.random() * 500; // random x position between 600 and 1100
+        this.x = x + Math.random() * 500; // random x position between 600 and 1100
         this.y = 400 - Math.random() * 400; // fixed y position
-    }
-
-    isDeadPufferFish() {
-        this.playAnimation(this.imagesPufferFish.dead); // Dead-Animation abspielen
-        this.dead = true; // Optional: Status setzen
-
     }
     
     animate() {
-        setInterval(() => {
-            if (this.blownUp && !this.blownSwimming) {
-                this.playAnimation(this.imagesPufferFish.blowing);
-                if (this.currentImageIndex % this.imagesPufferFish.blowing.length === this.imagesPufferFish.blowing.length - 1 && !this.blownSwimming) {
-                    this.blownSwimming = true;
-                    this.currentImageIndex = 0;
-                }
-            } else if (this.blownSwimming) {
-                this.playAnimation(this.imagesPufferFish.swimmingBlowed);
+        if (this.blownUp && !this.blownSwimming && !this.dead) {
+            this.playAnimation(this.imagesPufferFish.blowing);
+            if (this.currentImageIndex % this.imagesPufferFish.blowing.length === this.imagesPufferFish.blowing.length - 1 && !this.blownSwimming) {
+                this.blownSwimming = true;
+                this.currentImageIndex = 0;
             }
-            
-            else if (!this.dead) {
-                this.playAnimation(this.imagesPufferFish.swimming);
-            } else if (this.dead) {
-                this.playAnimation(this.imagesPufferFish.dead);
-            }
-        }, 1000 / 6); // change image every 1/6 second
-    }
-     
-
-    jump() {
-
+        } else if (this.blownSwimming && !this.dead) {
+            this.playAnimation(this.imagesPufferFish.swimmingBlowed);
+        } else if (!this.dead) {
+            this.playAnimation(this.imagesPufferFish.swimming);
+        } else if (this.dead) {
+            this.playAnimation(this.imagesPufferFish.dead);
+        }
     }
 }

@@ -19,17 +19,15 @@ class Collectable extends MovableObject {
         this.loadImage(this.imageType[type]);
         this.x = x;
         this.y = y;
-        this.collect();
+        setStoppableIntervals(() => this.collect(), 1000 / 60);
     }
 
     collect() {
-        setInterval(() => {
-            if (this.collected) {
-                this.y -= 5; // Move up by 5 pixels every interval
-                if (this.y < -50) {
-                    this.y = -50; // Stop moving up after reaching a certain height
-                }
+        if (this.collected) {
+            this.y -= 5; // Move up by 5 pixels every interval
+            if (this.y < -50) {
+                this.y = -50; // Stop moving up after reaching a certain height
             }
-        }, 1000 / 60); // 60 frames per second
+        }
     }
 }

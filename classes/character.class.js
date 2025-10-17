@@ -36,14 +36,15 @@ class Character extends MovableObject {
             'img/1.Sharkie/5.Hurt/1.Poisoned/4.png'
         ],
         hurtElectric : [
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o1.png',
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o2.png',
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o1.png',
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o2.png',
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o1.png',
-            'img/1.Sharkie/5.Hurt/2.Electric shock/.o2.png'
+            'img/1.Sharkie/5.Hurt/2.Electric shock/1.png',
+            'img/1.Sharkie/5.Hurt/2.Electric shock/2.png',
+            'img/1.Sharkie/5.Hurt/2.Electric shock/3.png',
+            'img/1.Sharkie/5.Hurt/2.Electric shock/1.png',
+            'img/1.Sharkie/5.Hurt/2.Electric shock/2.png',
+            'img/1.Sharkie/5.Hurt/2.Electric shock/3.png'
         ],
-        dead : [
+        dead : {
+            poisoned : [
             'img/1.Sharkie/6.dead/1.Poisoned/1.png',
             'img/1.Sharkie/6.dead/1.Poisoned/2.png',
             'img/1.Sharkie/6.dead/1.Poisoned/3.png',
@@ -55,13 +56,30 @@ class Character extends MovableObject {
             'img/1.Sharkie/6.dead/1.Poisoned/9.png',
             'img/1.Sharkie/6.dead/1.Poisoned/10.png',
             'img/1.Sharkie/6.dead/1.Poisoned/11.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/12.png'            
-        ],
-        stillDead : [
-            'img/1.Sharkie/6.dead/1.Poisoned/12.png'            
-        ],
-        attack : {
-            bubble : [
+            'img/1.Sharkie/6.dead/1.Poisoned/12.png'
+            ],
+            electric : [
+                'img/1.Sharkie/6.dead/2.Electro_shock/1.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/2.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/3.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/4.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/5.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/6.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/7.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/8.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/9.png',
+                'img/1.Sharkie/6.dead/2.Electro_shock/10.png'
+            ]
+        },
+        stillDead : {
+            poisoned : [
+                'img/1.Sharkie/6.dead/1.Poisoned/12.png'
+            ],
+            electric : [
+                'img/1.Sharkie/6.dead/2.Electro_shock/10.png'
+            ]
+        },
+        attack :  [
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/1.png',
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/2.png',
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/3.png',
@@ -70,8 +88,7 @@ class Character extends MovableObject {
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/6.png',
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/7.png',
                 'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/8.png'
-            ]
-        },
+        ],
         fallAsleep : [
             'img/1.Sharkie/2.Long_IDLE/i1.png',
             'img/1.Sharkie/2.Long_IDLE/I2.png',
@@ -109,8 +126,10 @@ class Character extends MovableObject {
     width = 180;
     x = 100;
     y = 100;
+    health = 100;
     world;
-    dead = false;
+    deadByElectric = false;
+    deadByPoison = false;
     isAttacking = false;
     waitingForAttack = false;
     isSleeping = false;
@@ -122,8 +141,10 @@ class Character extends MovableObject {
         this.loadImages(this.imagesCharacter.standing);
         this.loadImages(this.imagesCharacter.swimming);
         this.loadImages(this.imagesCharacter.hurtPoisoned);
-        this.loadImages(this.imagesCharacter.dead);
-        this.loadImages(this.imagesCharacter.attack.bubble);
+        this.loadImages(this.imagesCharacter.hurtElectric);
+        this.loadImages(this.imagesCharacter.dead.poisoned);
+        this.loadImages(this.imagesCharacter.dead.electric);
+        this.loadImages(this.imagesCharacter.attack);
         this.loadImages(this.imagesCharacter.fallAsleep);
         this.loadImages(this.imagesCharacter.sleeping);
         this.lastKeyPressTime = new Date().getTime();
@@ -175,31 +196,50 @@ class Character extends MovableObject {
         else if (!this.isAttacking) {
             if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
                 this.playAnimation(this.imagesCharacter.swimming);
-            } else if (this.isDead() && !this.dead) {
-                this.playAnimation(this.imagesCharacter.dead);
-                if (this.currentImageIndex % this.imagesCharacter.dead.length === this.imagesCharacter.dead.length - 1) {
-                    this.dead = true;
-                    this.currentImageIndex = 0;
+            } else if (this.isDead() && !this.deadByElectric && !this.deadByPoison) {
+                if (this.isPoisoned) {
+                    this.playAnimation(this.imagesCharacter.dead.poisoned);
+                    if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
+                        this.deadByPoison = true;
+                        this.currentImageIndex = 0;
+                    }
+                } else if (this.isElectrified) {
+                    this.playAnimation(this.imagesCharacter.dead.electric);
+                    if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
+                        this.deadByElectric = true;
+                        this.currentImageIndex = 0;
+                    }
                 }
-            } else if (this.dead) {
-                this.playAnimation(this.imagesCharacter.stillDead);
+            } else if (this.deadByPoison) {
+                this.playAnimation(this.imagesCharacter.stillDead.poisoned);
+            } else if (this.deadByElectric) {
+                this.playAnimation(this.imagesCharacter.stillDead.electric);
             } else if (this.isFallingAsleep && !this.isSleeping) {
                 this.playAnimation(this.imagesCharacter.fallAsleep);
                 if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
                     this.isSleeping = true;
                     this.isFallingAsleep = false;
                     this.currentImageIndex = 0;
-                    this.playSleepingAnimationSlow();
+                    this.playSleepingAnimation();
                 }
-            } else if (this.isHurt()) {
+            } else if (this.isHurt() && this.isPoisoned) {
                 this.playAnimation(this.imagesCharacter.hurtPoisoned);
+                setTimeout(() => {
+                    this.isPoisoned = false;
+                }, 1100);
+            } else if (this.isHurt() && this.isElectrified) {
+                this.playAnimation(this.imagesCharacter.hurtElectric);
+                setTimeout(() => {
+                    this.isElectrified = false;
+                    
+                }, 1100);
             } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
                 this.playAnimation(this.imagesCharacter.standing);
             }
         }
     }
 
-    playSleepingAnimationSlow() {
+    playSleepingAnimation() {
         if (this.sleepInterval) {
             clearInterval(this.sleepInterval);
             this.sleepInterval = null;
@@ -218,7 +258,7 @@ class Character extends MovableObject {
 
 
     playAttackAnimation() {
-    const frames = this.imagesCharacter.attack.bubble;
+    const frames = this.imagesCharacter.attack;
     let i = 0;
     const attackInterval = setInterval(() => {
         this.loadImage(frames[i]);

@@ -5,6 +5,9 @@ class MovableObject extends DrawableObject {
     gravity = 2; // pixels per tick^2, just a start value
     speedY = 0;
     keyboard;
+    startMovingDistance = 1000;
+    isPoisoned = false;
+    isElectrified = false;
 
     getHitbox() {
         return {
@@ -27,15 +30,37 @@ class MovableObject extends DrawableObject {
         );
     }
 
-    hit() {
-        this.health -= 20;
-        if (this.health < 0) {
-            this.health = 0;
+    hit(damage, hittedBy) {
+        let now = new Date().getTime();
+        if (now - this.lastHit < 1000) return; // 1 Sekunde Immunität nach Hit
+
+        this.world.character.health -= damage;
+        this.lastHit = now;
+
+        if (hittedBy === 'poison') this.isPoisoned = true;
+        if (hittedBy === 'electric') this.isElectrified = true;
+
+        if (this.world.character.health <= 0) {
+            this.world.character.health = 0;
+        }
+    }
+
+    /*
+    hit(damage, hittedBy) {
+        this.world.character.health -= damage;
+        if (hittedBy == 'poison') {
+            this.isPoisoned = true;
+        } else if (hittedBy == 'electric') {
+            this.isElectrified = true;
+        }
+        if (this.world.character.health < 0) {
+            this.world.character.health = 0;
         }
         else {
             this.lastHit = new Date().getTime();
         }
     }
+    */
 
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit
@@ -45,7 +70,7 @@ class MovableObject extends DrawableObject {
     }
 
     isDead() {
-        return this.health == 0;
+        return this.world.character.health == 0;        
     }
 
     playAnimation(images) {

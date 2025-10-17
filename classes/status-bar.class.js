@@ -30,9 +30,7 @@ class StatusBar extends DrawableObject {
         ]
     }
 
-    health = 100;
-    coins = 0;
-    poison = 0;
+    
     type; // 'life', 'coins', 'poison', 'instructions'
 
     constructor(type, x, y, height, width) {

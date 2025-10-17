@@ -8,7 +8,7 @@ function startGame() {
     intervals.forEach(id => clearInterval(id));
     intervals = [];
     world = null;
-    level1 = createLevel1(); // <-- das kommt gleich
+    level1 = createLevel1();
     canvas = document.getElementById("canvas");
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -18,6 +18,14 @@ function startGame() {
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     world = new World(canvas, keyboard);
+}
+
+function backToMenu() {
+    canvas.style.display = 'none';
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('endScreenBtns').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'flex';
+    document.getElementById('startText').style.display = 'flex';
 }
 
 

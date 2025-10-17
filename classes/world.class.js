@@ -44,8 +44,11 @@ class World {
     this.character.world = this;
     this.level.enemies.forEach(e => {
         e.world = this;
-        if (e instanceof Endboss) {
+        if (typeof e.animate === 'function') {
             setStoppableIntervals(() => e.animate(), 1000 / 6);
+        }
+        if (typeof e.startMoving === 'function') {
+            setStoppableIntervals(() => e.startMoving(), 1000 / 60);
         }
     });
         if (this.throwableObject) {
@@ -62,20 +65,19 @@ class World {
     }
 
     checkGameOver() {
-        if (!this.gameOver && this.character.dead) {
+        if ((this.character.deadByElectric || this.character.deadByPoison) && !this.gameOver) {
             endGame();
             this.gameOver = true;
         }
     }
 
     popup() {
-        this.level.enemies.forEach(pufferFish => {
-            if (pufferFish.x < this.character.x + 400) {
-                pufferFish.blownUp = true;
-                pufferFish.offset.top = 5;
-                pufferFish.offset.bottom = 5;
-                pufferFish.offset.left = 10;
-                
+        this.level.enemies.forEach(enemy => {
+            if (enemy instanceof PufferFish && enemy.x < this.character.x + 400) {
+                enemy.blownUp = true;
+                enemy.offset.top = 5;
+                enemy.offset.bottom = 5;
+                enemy.offset.left = 10;
             }
         });
     }
@@ -98,8 +100,16 @@ class World {
 
     checkCollisions() {
         this.level.enemies.forEach(enemy => {
+            let damage = 20;
             if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
-                this.character.hit();
+                if (enemy instanceof PufferFish) {
+                this.character.hit(damage, 'poison');
+            } else if (enemy instanceof JellyFish) {
+                if (enemy.color == 'green') {
+                    damage = 100;                    
+                } 
+                this.character.hit(damage, 'electric');
+            }
                 this.statusBar[0].setHealth(this.character.health);
             }
         });
@@ -147,7 +157,6 @@ class World {
         this.drawMultipleObjects(this.level.enemies);
         this.drawMultipleObjects(this.throwableObject);
         this.drawMultipleObjects(this.collectableObjects);
-
         this.ctx.translate(-this.camera_x, 0); // reset camera
 
         requestAnimationFrame(() => this.draw());

@@ -6,7 +6,7 @@ class DrawableObject {
     y = 100;
     height = 150;
     width = 100;
-    health = 100;
+
 
 
     loadImage(path) {
@@ -23,7 +23,17 @@ class DrawableObject {
     }
 
     draw(ctx) {
-        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        // Defensive: ensure this.img is a valid HTMLImageElement (or similar) before drawing
+        if (!this.img) {
+            // try to pick a cached image as a fallback
+            const keys = Object.keys(this.imageCache);
+            if (keys.length) {
+                this.img = this.imageCache[keys[0]];
+            }
+        }
+        if (this.img && this.img instanceof HTMLImageElement) {
+            ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+        }
     }
 
     drawFrame(ctx) {

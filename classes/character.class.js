@@ -1,7 +1,7 @@
 class Character extends MovableObject {
 
     imagesCharacter = {
-        standing : [
+        standing: [
             'img/1.Sharkie/1.IDLE/1.png',
             'img/1.Sharkie/1.IDLE/2.png',
             'img/1.Sharkie/1.IDLE/3.png',
@@ -21,7 +21,7 @@ class Character extends MovableObject {
             'img/1.Sharkie/1.IDLE/17.png',
             'img/1.Sharkie/1.IDLE/18.png',
         ],
-        swimming : [
+        swimming: [
             'img/1.Sharkie/3.Swim/1.png',
             'img/1.Sharkie/3.Swim/2.png',
             'img/1.Sharkie/3.Swim/3.png',
@@ -29,13 +29,13 @@ class Character extends MovableObject {
             'img/1.Sharkie/3.Swim/5.png',
             'img/1.Sharkie/3.Swim/6.png'
         ],
-        hurtPoisoned : [
+        hurtPoisoned: [
             'img/1.Sharkie/5.Hurt/1.Poisoned/1.png',
             'img/1.Sharkie/5.Hurt/1.Poisoned/2.png',
             'img/1.Sharkie/5.Hurt/1.Poisoned/3.png',
             'img/1.Sharkie/5.Hurt/1.Poisoned/4.png'
         ],
-        hurtElectric : [
+        hurtElectric: [
             'img/1.Sharkie/5.Hurt/2.Electric shock/1.png',
             'img/1.Sharkie/5.Hurt/2.Electric shock/2.png',
             'img/1.Sharkie/5.Hurt/2.Electric shock/3.png',
@@ -43,22 +43,22 @@ class Character extends MovableObject {
             'img/1.Sharkie/5.Hurt/2.Electric shock/2.png',
             'img/1.Sharkie/5.Hurt/2.Electric shock/3.png'
         ],
-        dead : {
-            poisoned : [
-            'img/1.Sharkie/6.dead/1.Poisoned/1.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/2.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/3.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/4.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/5.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/6.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/7.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/8.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/9.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/10.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/11.png',
-            'img/1.Sharkie/6.dead/1.Poisoned/12.png'
+        dead: {
+            poisoned: [
+                'img/1.Sharkie/6.dead/1.Poisoned/1.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/2.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/3.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/4.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/5.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/6.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/7.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/8.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/9.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/10.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/11.png',
+                'img/1.Sharkie/6.dead/1.Poisoned/12.png'
             ],
-            electric : [
+            electric: [
                 'img/1.Sharkie/6.dead/2.Electro_shock/1.png',
                 'img/1.Sharkie/6.dead/2.Electro_shock/2.png',
                 'img/1.Sharkie/6.dead/2.Electro_shock/3.png',
@@ -71,25 +71,25 @@ class Character extends MovableObject {
                 'img/1.Sharkie/6.dead/2.Electro_shock/10.png'
             ]
         },
-        stillDead : {
-            poisoned : [
+        stillDead: {
+            poisoned: [
                 'img/1.Sharkie/6.dead/1.Poisoned/12.png'
             ],
-            electric : [
+            electric: [
                 'img/1.Sharkie/6.dead/2.Electro_shock/10.png'
             ]
         },
-        attack :  [
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/1.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/2.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/3.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/4.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/5.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/6.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/7.png',
-                'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/8.png'
+        attack: [
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/1.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/2.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/3.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/4.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/5.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/6.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/7.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/8.png'
         ],
-        fallAsleep : [
+        fallAsleep: [
             'img/1.Sharkie/2.Long_IDLE/i1.png',
             'img/1.Sharkie/2.Long_IDLE/I2.png',
             'img/1.Sharkie/2.Long_IDLE/I3.png',
@@ -105,7 +105,7 @@ class Character extends MovableObject {
             'img/1.Sharkie/2.Long_IDLE/I13.png',
             'img/1.Sharkie/2.Long_IDLE/I14.png'
         ],
-        sleeping : [
+        sleeping: [
             'img/1.Sharkie/2.Long_IDLE/I11.png',
             'img/1.Sharkie/2.Long_IDLE/I12.png',
             'img/1.Sharkie/2.Long_IDLE/I13.png',
@@ -114,7 +114,8 @@ class Character extends MovableObject {
 
     }
 
-    offset = { top: 140,
+    offset = {
+        top: 140,
         bottom: 70,
         left: 40,
         right: 40
@@ -157,11 +158,11 @@ class Character extends MovableObject {
             this.x += 3;
             this.otherDirection = false;
         }
-        if (kb.LEFT && this.x > 100  && !this.isDead()) {
+        if (kb.LEFT && this.x > 100 && !this.isDead()) {
             this.x -= 3;
             this.otherDirection = true;
         }
-        if (kb.UP  && this.y > -100 && !this.isDead()) {
+        if (kb.UP && this.y > -100 && !this.isDead()) {
             this.y -= 2;
         }
         if (kb.DOWN && this.y < this.world.canvas.height - this.height + 50 && !this.isDead()) {
@@ -180,7 +181,7 @@ class Character extends MovableObject {
         }
         this.world.camera_x = -this.x + 100; // camera follows character
     }
-    
+
     animate() {
         // --- ATTACK START ---
         if (this.world.keyboard.SPACE && !this.isHurt() && !this.isDead() && !this.isAttacking && !this.waitingForAttack) {
@@ -225,14 +226,13 @@ class Character extends MovableObject {
             } else if (this.isHurt() && this.isPoisoned) {
                 this.playAnimation(this.imagesCharacter.hurtPoisoned);
                 setTimeout(() => {
-                    this.isPoisoned = false;
-                }, 1100);
+                    if (!this.isHurt()) this.isPoisoned = false;
+                }, 1200);
             } else if (this.isHurt() && this.isElectrified) {
                 this.playAnimation(this.imagesCharacter.hurtElectric);
                 setTimeout(() => {
-                    this.isElectrified = false;
-                    
-                }, 1100);
+                    if (!this.isHurt()) this.isElectrified = false;
+                }, 1200);
             } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
                 this.playAnimation(this.imagesCharacter.standing);
             }
@@ -255,24 +255,22 @@ class Character extends MovableObject {
         }, 1000 / 5);
     }
 
-
-
     playAttackAnimation() {
-    const frames = this.imagesCharacter.attack;
-    let i = 0;
-    const attackInterval = setInterval(() => {
-        this.loadImage(frames[i]);
-        i++;
-        if (i >= frames.length) {
-            clearInterval(attackInterval);
-            this.isAttacking = false; 
-            this.currentImageIndex = 0;
-            setTimeout(() => {
-                this.waitingForAttack = false;
-            }, 1000);
-        }
-    }, 50);
-}
+        const frames = this.imagesCharacter.attack;
+        let i = 0;
+        const attackInterval = setInterval(() => {
+            this.loadImage(frames[i]);
+            i++;
+            if (i >= frames.length) {
+                clearInterval(attackInterval);
+                this.isAttacking = false;
+                this.currentImageIndex = 0;
+                setTimeout(() => {
+                    this.waitingForAttack = false;
+                }, 1000);
+            }
+        }, 50);
+    }
 
 
 }

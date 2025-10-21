@@ -64,11 +64,11 @@ class JellyFish extends MovableObject {
         }
     };
 
-    height = 70;
-    width = 70;
+    height = 50;
+    width = 50;
     dead = false;
     currentImageIndex = 0;
-    offset = { top: 15, bottom: 35, left: 10, right: 20 };
+    offset = { top: 10, bottom: 15, left: 8, right: 10 };
 
     constructor(x, color) {
         super();
@@ -86,7 +86,12 @@ class JellyFish extends MovableObject {
     }
 
     animate() {
-        this.playAnimation(this.imagesJellyFish[this.color].swimming);
+        if (!this.dead) {
+            this.playAnimation(this.imagesJellyFish[this.color].swimming);
+        } else if (this.dead) {
+            this.playAnimation(this.imagesJellyFish[this.color].dead);
+        }
+        
     }
 
     startMoving() {

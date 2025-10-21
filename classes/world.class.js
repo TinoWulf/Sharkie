@@ -8,26 +8,28 @@ class World {
     speedLever = 0;
     camera_x = -100;
     gameOver = false;
+    collidingImunity = false;
+
     statusBar = [new StatusBar('life', 10, 0, 50, 200),
-                 new StatusBar('coins', 10, 40, 50, 200),
-                 new StatusBar('poison', 10, 80, 50, 200),
-                 new StatusBar('instructions', 0, 330, 150, 300)
+    new StatusBar('coins', 10, 40, 50, 200),
+    new StatusBar('poison', 10, 80, 50, 200),
+    new StatusBar('instructions', 0, 330, 150, 300)
     ];
     throwableObject = [new Throwable()];
     collectableObjects = [new Collectable(400, 300, 'coin'),
-        new Collectable(800, 200, 'coin'),
-        new Collectable(1200, 350, 'coin'),
-        new Collectable(1600, 250, 'coin'),
-        new Collectable(300, 400, 'life'),
-        new Collectable(400, 400, 'life'),
-        new Collectable(500, 400, 'life'),
-        new Collectable(600, 400, 'poison'),
-        new Collectable(700, 400, 'poison'),
-        new Collectable(800, 400, 'poison')
+    new Collectable(800, 200, 'coin'),
+    new Collectable(1200, 350, 'coin'),
+    new Collectable(1600, 250, 'coin'),
+    new Collectable(300, 400, 'life'),
+    new Collectable(400, 400, 'life'),
+    new Collectable(500, 400, 'life'),
+    new Collectable(600, 400, 'poison'),
+    new Collectable(700, 400, 'poison'),
+    new Collectable(800, 400, 'poison')
 
     ];
 
-    constructor(canvas , keyboard) {
+    constructor(canvas, keyboard) {
         this.ctx = canvas.getContext('2d');
         this.setWorld();
         this.canvas = canvas;
@@ -41,16 +43,16 @@ class World {
     }
 
     setWorld() {
-    this.character.world = this;
-    this.level.enemies.forEach(e => {
-        e.world = this;
-        if (typeof e.animate === 'function') {
-            setStoppableIntervals(() => e.animate(), 1000 / 6);
-        }
-        if (typeof e.startMoving === 'function') {
-            setStoppableIntervals(() => e.startMoving(), 1000 / 60);
-        }
-    });
+        this.character.world = this;
+        this.level.enemies.forEach(e => {
+            e.world = this;
+            if (typeof e.animate === 'function') {
+                setStoppableIntervals(() => e.animate(), 1000 / 6);
+            }
+            if (typeof e.startMoving === 'function') {
+                setStoppableIntervals(() => e.startMoving(), 1000 / 60);
+            }
+        });
         if (this.throwableObject) {
             this.throwableObject.forEach(obj => {
                 obj.world = this;
@@ -83,45 +85,64 @@ class World {
     }
 
     checkThrowableObjects() {
-            let throwX, throwY;
-            if (this.character.otherDirection) {
-                throwX = this.character.getHitbox().x;
-                throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2;
-            } else {
-                throwX = this.character.getHitbox().x + this.character.getHitbox().width - 10;
-                throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2 - 12 ;
-            }
+        let throwX, throwY;
+        if (this.character.otherDirection) {
+            throwX = this.character.getHitbox().x;
+            throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2;
+        } else {
+            throwX = this.character.getHitbox().x + this.character.getHitbox().width - 10;
+            throwY = this.character.getHitbox().y + this.character.getHitbox().height / 2 - 12;
+        }
 
-            const t = new Throwable(throwX, throwY);
-            t.otherDirection = this.character.otherDirection;
-            this.throwableObject.push(t);
-           
+        const t = new Throwable(throwX, throwY);
+        t.otherDirection = this.character.otherDirection;
+        this.throwableObject.push(t);
+
     }
 
     checkCollisions() {
-        this.level.enemies.forEach(enemy => {
-            let damage = 20;
-            if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
-                if (enemy instanceof PufferFish) {
-                this.character.hit(damage, 'poison');
-            } else if (enemy instanceof JellyFish) {
-                if (enemy.color == 'green') {
-                    damage = 100;                    
-                } 
-                this.character.hit(damage, 'electric');
-            }
-                this.statusBar[0].setHealth(this.character.health);
-            }
-        });
+        if (!this.collidingImunity) {
+            this.level.enemies.forEach(enemy => {
+                let damage = 20;
+                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
+                    if (enemy instanceof PufferFish) {
+                        this.character.hit(damage, 'poison');
+                        this.collidingImunity = true;
+                    } else if (enemy instanceof JellyFish) {
+                        if (enemy.color == 'green') {
+                            damage = 100;
+                            this.collidingImunity = true;
+                        }
+                        this.character.hit(damage, 'electric');
+                    } else if (enemy instanceof Endboss) {
+                        this.character.bitingSharkie = true;
+                        setTimeout(() => {
+                            this.character.hit(damage, 'poison');
+                            this.statusBar[0].setHealth(this.character.health);
+                        }, 500);
+                    }
+                    this.statusBar[0].setHealth(this.character.health);
+                    setTimeout(() => {
+                        this.collidingImunity = false;
+                        this.character.bitingSharkie = false;
+                    }, 1200);
+                }
+            });
+        }
 
         for (let i = this.throwableObject.length - 1; i >= 0; i--) {
             for (let j = this.level.enemies.length - 1; j >= 0; j--) {
                 if (this.throwableObject[i].isColliding(this.level.enemies[j])) {
-                    this.throwableObject.splice(i, 1);
-                    this.level.enemies[j].dead = true;
-                    setTimeout(() => {
-                        this.level.enemies.splice(j, 1);
-                    }, 500);
+                    if (this.level.enemies[j] instanceof Endboss) {
+                        this.level.enemies[j].hit(20, 'bubble');
+                        this.throwableObject.splice(i, 1);
+                    } else {
+                        this.throwableObject.splice(i, 1);
+                        this.level.enemies[j].dead = true;
+                        setTimeout(() => {
+                            this.level.enemies.splice(j, 1);
+                        }, 500);
+                    }
                     break;
                 }
             }
@@ -169,7 +190,7 @@ class World {
     }
 
     drawObject(movableObject) {
-        if(movableObject.otherDirection) {
+        if (movableObject.otherDirection) {
             this.ctx.save();
             this.ctx.translate(movableObject.x + movableObject.width / 2, 0);
             this.ctx.scale(-1, 1);
@@ -178,7 +199,7 @@ class World {
             this.ctx.restore();
             movableObject.drawFrame(this.ctx);
             return;
-            
+
         }
         movableObject.draw(this.ctx);
         movableObject.drawFrame(this.ctx);

@@ -32,6 +32,18 @@ class MovableObject extends DrawableObject {
         );
     }
 
+    isCollidingWithBox(box) {
+        let a = this.getHitbox();
+        let b = box;
+
+        return (
+            a.x + a.width > b.x &&
+            a.y + a.height > b.y &&
+            a.x < b.x + b.width &&
+            a.y < b.y + b.height
+        );
+    }
+
     hit(damage, hittedBy) {
         let now = new Date().getTime();
         if (now - this.lastHit < 1200) return; // 1.2 Sek. Immunität
@@ -63,7 +75,7 @@ class MovableObject extends DrawableObject {
     }
 
     isDead() {
-        return this.world.character.health == 0;        
+        return this.world.character.health == 0;
     }
 
     playAnimation(images) {
@@ -84,8 +96,8 @@ class MovableObject extends DrawableObject {
     }
 
     applyGravity() {
-                this.y += this.speedY;
-                this.speedY += this.gravity;
+        this.y += this.speedY;
+        this.speedY += this.gravity;
     }
 
 

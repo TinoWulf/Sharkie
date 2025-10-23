@@ -20,8 +20,12 @@ h1 {
     letter-spacing: 3px;
 }
 
-h2 {
-    margin-bottom: 100px;
+#startText {
+    margin-bottom: 50px;
+    text-align: center;
+    margin-left: 200px;
+    margin-right: 200px;
+    letter-spacing: 1px;
 }
 
 #startBtn {

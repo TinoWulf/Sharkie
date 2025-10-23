@@ -56,13 +56,16 @@ class Endboss extends MovableObject {
 
     currentImageIndex = 0;
     introduced = false;
-    speed = 8;           // Startgeschwindigkeit
-    speedDirection = 10;  // 1 = erhöhen, -1 = verringern
-    maxSpeed = 16;
-    minSpeed = 6;
+    speed = 15;           // Startgeschwindigkeit
+    speedDirection = 5;  // 1 = erhöhen, -1 = verringern
+    maxSpeed = 25;
+    minSpeed = 10;
     dead = false;
     isDying = false;        // wurde Sterbeablauf gestartet?
     isPlayingDead = false;
+
+    attackOffset = { top: 190, bottom: 80, left: -60, right: -20 };
+    bubbleOffset = { top: 200, bottom: 100, left: 60, right: 60 };
 
     offset = { top: 190, bottom: 80, left: -60, right: -20 };
 
@@ -74,11 +77,12 @@ class Endboss extends MovableObject {
         this.loadImages(this.imagesEndboss.hurt);
         this.loadImages(this.imagesEndboss.dead);
         this.loadImages(this.imagesEndboss.stillDead);
-        this.x = 800;
+        this.x = 9000;
         this.y = 20;
         this.height = 400;
         this.width = 300;
-        this.health = 100;
+        this.health = 200;
+        this.img = this.imageCache[this.imagesEndboss.introduce[0]];
     }
 
     hit(damage) {
@@ -143,7 +147,7 @@ class Endboss extends MovableObject {
         }
 
         // 4) Introduce
-        if (this.world.character.x > 200 && !this.introduced) {
+        if (this.world.character.x > 8100 && !this.introduced) {
             this.playAnimation(this.imagesEndboss.introduce);
             if (this.currentImageIndex % this.imagesEndboss.introduce.length === this.imagesEndboss.introduce.length - 1) {
                 this.introduced = true;
@@ -158,11 +162,6 @@ class Endboss extends MovableObject {
             this.moveTowardsCharacter();
         }
     }
-
-
-
-
-
 
 
     moveTowardsCharacter() {
@@ -189,5 +188,41 @@ class Endboss extends MovableObject {
         } else if (character.y + character.height / 2 > this.y + this.height / 2) {
             this.y += this.speed / 2;
         }
+    }
+
+    getAttackHitbox() {
+        return {
+            x: this.x + this.attackOffset.left,
+            y: this.y + this.attackOffset.top,
+            width: this.width - this.attackOffset.left - this.attackOffset.right,
+            height: this.height - this.attackOffset.top - this.attackOffset.bottom
+        };
+    }
+
+    getBubbleHitbox() {
+        return {
+            x: this.x + this.bubbleOffset.left,
+            y: this.y + this.bubbleOffset.top,
+            width: this.width - this.bubbleOffset.left - this.bubbleOffset.right,
+            height: this.height - this.bubbleOffset.top - this.bubbleOffset.bottom
+        };
+    }
+
+    drawHitboxes(ctx) {
+        // Angriffshitbox (rot)
+        const attackBox = this.getAttackHitbox();
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'red';
+        ctx.rect(attackBox.x, attackBox.y, attackBox.width, attackBox.height);
+        ctx.stroke();
+
+        // Bubble-Hitbox (grün)
+        const bubbleBox = this.getBubbleHitbox();
+        ctx.beginPath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = 'green';
+        ctx.rect(bubbleBox.x, bubbleBox.y, bubbleBox.width, bubbleBox.height);
+        ctx.stroke();
     }
 }

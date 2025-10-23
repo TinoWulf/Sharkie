@@ -3,6 +3,11 @@ let world;
 let keyboard = new Keyboard();
 let intervals = [];
 
+function init() {
+    document.getElementById('startHeadline').innerHTML = 'Dive into the Depths with Sharkie! 🦈';
+    document.getElementById('startText').innerHTML = 'Join Sharkie on an epic underwater adventure through vibrant coral caves and dark ocean trenches. Battle fierce jellyfish, sneaky pufferfish, and the mighty Endboss lurking in the deep. Swim, strike, and survive in this fast-paced, beautifully animated world where every bubble counts. Can you help Sharkie reclaim the seas?';
+}
+
 
 function startGame() {
     intervals.forEach(id => clearInterval(id));
@@ -14,18 +19,60 @@ function startGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.style.display = 'flex';
     document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('startHeadline').style.display = 'none';
     document.getElementById('startText').style.display = 'none';
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     world = new World(canvas, keyboard);
 }
 
+
 function backToMenu() {
+    init();
     canvas.style.display = 'none';
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
+    document.getElementById('backToMenu').style.display = 'none';
     document.getElementById('startBtn').style.display = 'flex';
     document.getElementById('startText').style.display = 'flex';
+    document.getElementById('startHeadline').style.display = 'flex';
+}
+
+
+function endGame(output) {
+    setTimeout(() => {
+        if (output === 'lose') {
+            document.getElementById('endScreen').style.display = 'flex';
+            document.getElementById('endScreenBtns').style.display = 'flex';
+            document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/Game Over/Recurso 9.png';
+            document.getElementById('changingBtn').onclick = startGame;
+            document.getElementById('changingBtn').innerHTML = 'Try Again';
+            intervals.forEach(id => clearInterval(id));
+            intervals = [];
+            initIntervals(world);
+        }
+
+        if (output === 'win') {
+            document.getElementById('endScreen').style.display = 'flex';
+            document.getElementById('endScreenBtns').style.display = 'flex';
+            document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/You win/Recurso 22.png';
+            document.getElementById('changingBtn').onclick = nextGame;
+            document.getElementById('changingBtn').innerHTML = 'Next Level';
+            intervals.forEach(id => clearInterval(id));
+            intervals = [];
+            initIntervals(world);
+
+        }
+    }, 1000);
+}
+
+
+function nextGame() {
+    canvas.style.display = 'none';
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('startText').style.display = 'flex';
+    document.getElementById('backToMenu').style.display = 'flex';
+    document.getElementById('startText').innerHTML = 'Unfortunately, no further levels exist yet, as the game is currently in alpha. However, you can replay the same level.';
 }
 
 
@@ -34,16 +81,6 @@ function setStoppableIntervals(fn, time) {
     intervals.push(id);
 }
 
-function endGame() {
-    setTimeout(() => {
-                document.getElementById('endScreen').style.display = 'flex';
-                document.getElementById('endScreenBtns').style.display = 'flex';
-                intervals.forEach(id => clearInterval(id));
-                intervals = [];
-                initIntervals(world);
-                }, 2000);
-
-}
 
 function initIntervals(world) {
     // Character Bewegung und Animation

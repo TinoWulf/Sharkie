@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,17 +22,21 @@
     <script src="./classes/level.class.js"></script>
     <script src="./levels/level1.js"></script>
 </head>
-<body>
+
+<body onload="init()">
     <h1>Sharkie</h1>
-    <h2 id="startText">Welcome to Sharkie</h2>
+    <h2 id="startHeadline"></h2>
+    <p id="startText"></p>
     <img onclick="startGame()" src="img/6.Botones/Start/1.png" alt="Start" id="startBtn">
+    <div class="endScreenBtn" id="backToMenu" onclick="backToMenu()" style="display: none;">Back to Menu</div>
     <canvas width="1020" height="480" id="canvas" style="display: none;"></canvas>
     <div id="endScreen" style="display: none;">
-        <img class="endScreenImg" src="img/6.Botones/Tittles/Game Over/Recurso 9.png" alt="">
+        <img class="endScreenImg" id="endScreenImg" src="img/6.Botones/Tittles/Game Over/Recurso 9.png" alt="">
         <div id="endScreenBtns" class="endScreenBtns" style="display: none;">
             <div class="endScreenBtn" onclick="backToMenu()">Back to Menu</div>
-            <div class="endScreenBtn" onclick="startGame()">Try Again</div>
+            <div class="endScreenBtn" id="changingBtn" onclick=""></div>
         </div>
     </div>
 </body>
+
 </html>

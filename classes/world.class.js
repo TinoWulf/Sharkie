@@ -7,8 +7,8 @@ class World {
     keyboard;
     speedLever = 0;
     camera_x = -100;
-    gameOver = false;
     collidingImunity = false;
+    gameOver = false;
 
     statusBar = [new StatusBar('life', 10, 0, 50, 200),
     new StatusBar('coins', 10, 40, 50, 200),
@@ -16,17 +16,18 @@ class World {
     new StatusBar('instructions', 0, 330, 150, 300)
     ];
     throwableObject = [new Throwable()];
-    collectableObjects = [new Collectable(400, 300, 'coin'),
-    new Collectable(800, 200, 'coin'),
-    new Collectable(1200, 350, 'coin'),
-    new Collectable(1600, 250, 'coin'),
-    new Collectable(300, 400, 'life'),
-    new Collectable(400, 400, 'life'),
-    new Collectable(500, 400, 'life'),
-    new Collectable(600, 400, 'poison'),
-    new Collectable(700, 400, 'poison'),
-    new Collectable(800, 400, 'poison')
-
+    collectableObjects = [
+        new Collectable(1500, 400, 'life'),
+        new Collectable(3000, 400, 'life'),
+        new Collectable(4000, 400, 'life'),
+        new Collectable(6000, 400, 'life'),
+        new Collectable(8000, 400, 'life'),
+        new Collectable(9000, 400, 'life'),
+        new Collectable(600, 400, 'poison'),
+        new Collectable(2300, 400, 'poison'),
+        new Collectable(3150, 400, 'poison'),
+        new Collectable(600, 400, 'poison'),
+        new Collectable(600, 400, 'poison')
     ];
 
     constructor(canvas, keyboard) {
@@ -37,9 +38,12 @@ class World {
         this.draw();
         this.checkCollisions();
         this.character.world = this;
+        this.level.enemies.forEach(enemy => enemy.world = this);
         setStoppableIntervals(() => this.character.moveCharacter(), 1000 / 60);
         setStoppableIntervals(() => this.character.animate(), 100);
         setStoppableIntervals(() => this.run(), 1000 / 60);
+        setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
+        this.collectableObjects.push(...Collectable.spawnBatch(15, 'coin'));
     }
 
     setWorld() {
@@ -64,11 +68,18 @@ class World {
         this.checkCollisions();
         this.popup();
         this.checkGameOver();
+        console.log(this.character.x);
     }
 
     checkGameOver() {
         if ((this.character.deadByElectric || this.character.deadByPoison) && !this.gameOver) {
-            endGame();
+            endGame('lose');
+            this.gameOver = true;
+        }
+
+        const endboss = this.level.enemies.find(e => e instanceof Endboss);
+        if (endboss && endboss.dead && !this.gameOver) {
+            endGame('win');
             this.gameOver = true;
         }
     }
@@ -100,54 +111,69 @@ class World {
 
     }
 
-    checkCollisions() {
-        if (!this.collidingImunity) {
-            this.level.enemies.forEach(enemy => {
-                let damage = 20;
-                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) {
-                    if (enemy instanceof PufferFish) {
-                        this.character.hit(damage, 'poison');
-                        this.collidingImunity = true;
-                    } else if (enemy instanceof JellyFish) {
-                        if (enemy.color == 'green') {
-                            damage = 100;
-                            this.collidingImunity = true;
+    checkCollisions() { // Main function that handles all in-game collision checks
+        if (!this.collidingImunity) { // Only run if Sharkie is not temporarily invincible
+            this.level.enemies.forEach(enemy => { // Loop through every enemy in the level
+                let damage = 20; // Default collision damage
+                if (this.character.isColliding(enemy) && !this.character.isDead() && !this.character.isHurt()) { // If Sharkie collides, is alive, and not currently hurt
+                    if (enemy instanceof PufferFish) { // Collision with pufferfish
+                        this.character.hit(damage, 'poison'); // Apply poison damage
+                        this.collidingImunity = true; // Enable short immunity
+                    } else if (enemy instanceof JellyFish) { // Collision with jellyfish
+                        if (enemy.color == 'green') { // Green jellyfish deal more damage
+                            damage = 100; // Stronger electric damage
+                            this.collidingImunity = true; // Enable immunity
                         }
-                        this.character.hit(damage, 'electric');
-                    } else if (enemy instanceof Endboss) {
-                        this.character.bitingSharkie = true;
-                        setTimeout(() => {
-                            this.character.hit(damage, 'poison');
-                            this.statusBar[0].setHealth(this.character.health);
-                        }, 500);
+                        this.character.hit(damage, 'electric'); // Apply electric damage
+                    } else if (enemy instanceof Endboss) { // Collision with endboss
+                        let sharkieBox = this.character.getHitbox(); // Get Sharkie’s hitbox
+                        let bossBox = enemy.getAttackHitbox(); // Get the boss’s attack hitbox
+                        if (this.boxCollision(sharkieBox, bossBox)) { // Check if Sharkie overlaps with attack zone
+                            this.character.bitingSharkie = true; // Boss bite animation/flag
+                            setTimeout(() => { // Delay before damage is applied
+                                this.character.hit(damage, 'poison'); // Apply bite damage
+                                this.statusBar[0].setHealth(this.character.health); // Update life bar
+                            }, 500); // Apply after 0.5 seconds
+                        }
                     }
-                    this.statusBar[0].setHealth(this.character.health);
-                    setTimeout(() => {
-                        this.collidingImunity = false;
-                        this.character.bitingSharkie = false;
-                    }, 1200);
+                    this.statusBar[0].setHealth(this.character.health); // Always update health display
+                    setTimeout(() => { // Schedule immunity reset
+                        this.collidingImunity = false; // Remove invincibility
+                        this.character.bitingSharkie = false; // Stop bite animation
+                    }, 1200); // Immunity lasts for 1.2 seconds
                 }
             });
         }
 
-        for (let i = this.throwableObject.length - 1; i >= 0; i--) {
-            for (let j = this.level.enemies.length - 1; j >= 0; j--) {
-                if (this.throwableObject[i].isColliding(this.level.enemies[j])) {
-                    if (this.level.enemies[j] instanceof Endboss) {
-                        this.level.enemies[j].hit(20, 'bubble');
-                        this.throwableObject.splice(i, 1);
-                    } else {
-                        this.throwableObject.splice(i, 1);
-                        this.level.enemies[j].dead = true;
-                        setTimeout(() => {
-                            this.level.enemies.splice(j, 1);
+        // --- Throwable (bubble) vs enemy collision check ---
+        for (let i = this.throwableObject.length - 1; i >= 0; i--) { // Iterate backwards through all active bubbles
+            const throwable = this.throwableObject[i]; // Current bubble reference
+            for (let j = this.level.enemies.length - 1; j >= 0; j--) { // Iterate backwards through all enemies
+                const enemy = this.level.enemies[j]; // Current enemy reference
+
+                if (enemy instanceof Endboss) { // Special case: Endboss has two hitboxes
+                    if (throwable.isCollidingWithBox(enemy.getBubbleHitbox())) { // If bubble hits the green (vulnerable) hitbox
+                        enemy.hit(20, 'bubble'); // Apply bubble damage to the boss
+                        this.throwableObject.splice(i, 1); // Remove the bubble from the array
+                        break; // Exit inner loop and go to next bubble
+                    }
+                    continue; // Skip checking the red box — it should not remove the bubble
+                }
+
+                if (throwable.isColliding(enemy)) { // Regular enemy collision
+                    this.throwableObject.splice(i, 1); // Remove bubble once it hits
+                    if (enemy instanceof Endboss) { // Safety fallback for boss (should not trigger)
+                        enemy.hit(20, 'bubble'); // Apply bubble damage just in case
+                    } else { // Normal enemy logic
+                        enemy.dead = true; // Mark enemy as dead
+                        setTimeout(() => { // Remove enemy from level after short delay
+                            this.level.enemies.splice(j, 1); // Delete enemy from array
                         }, 500);
                     }
-                    break;
+                    break; // Stop checking this bubble after a hit
                 }
             }
         }
-
         this.collectableObjects.forEach(collectable => {
             if (this.character.isColliding(collectable) && !collectable.collected) {
                 if (collectable.imageType.coin.includes('Coin') || collectable.constructor.name === 'Collectable' && collectable.type === 'coin') {
@@ -201,8 +227,20 @@ class World {
             return;
 
         }
+        if (movableObject instanceof Endboss) {
+            movableObject.drawHitboxes(this.ctx); // zeigt beide Boxen gleichzeitig
+        }
         movableObject.draw(this.ctx);
         movableObject.drawFrame(this.ctx);
+    }
+
+    boxCollision(boxA, boxB) {
+        return (
+            boxA.x < boxB.x + boxB.width &&
+            boxA.x + boxA.width > boxB.x &&
+            boxA.y < boxB.y + boxB.height &&
+            boxA.y + boxA.height > boxB.y
+        );
     }
 
 }

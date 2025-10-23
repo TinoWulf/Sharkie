@@ -47,4 +47,15 @@ class DrawableObject {
             ctx.stroke();
         }
     }
+
+    drawAttackFrame(ctx) {
+        if (this.bubbleOffset) {
+            let box = this.getBubbleHitbox();
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = 'green';
+            ctx.rect(box.x, box.y, box.width, box.height);
+            ctx.stroke();
+        }
+    }
 }

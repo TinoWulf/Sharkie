@@ -24,6 +24,7 @@ function startGame() {
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     world = new World(canvas, keyboard);
+    playBackgroundMusik();
 }
 
 
@@ -50,6 +51,7 @@ function endGame(output) {
             intervals.forEach(id => clearInterval(id));
             intervals = [];
             initIntervals(world);
+            world.playSound('audio/lose.wav', 0.4);
         }
 
         if (output === 'win') {
@@ -61,7 +63,17 @@ function endGame(output) {
             intervals.forEach(id => clearInterval(id));
             intervals = [];
             initIntervals(world);
+            world.playSound('audio/win.wav', 0.4);
+            world.playSound('audio/cheering.wav', 0.4);
+        }
 
+        if (world && world.backgroundMusic) {
+            world.backgroundMusic.pause();
+            world.backgroundMusic.currentTime = 0;
+        }
+
+        if (world && world.bossMusic) {
+            world.bossMusic.pause();
         }
     }, 1000);
 }
@@ -98,6 +110,23 @@ function initIntervals(world) {
 
     // Weitere Intervalle nach Bedarf (z.B. für World-Methoden)
     setStoppableIntervals(() => world.run(), 1000 / 60);
+}
+
+function playBackgroundMusik() {
+    const bgMusic = new Audio('audio/Game-music.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.1;
+    if (world.isMuted) {
+        bgMusic.muted = true;
+    }
+    bgMusic.play();
+    world.backgroundMusic = bgMusic;
+    window.world = world;
+    const bossMusic = new Audio('audio/game-music-endboss.mp3');
+    bossMusic.loop = true;
+    bossMusic.volume = 0.5;
+    world.bossMusic = bossMusic;
+    world.bossMusicStarted = false;
 }
 
 window.addEventListener("keydown", (e) => {

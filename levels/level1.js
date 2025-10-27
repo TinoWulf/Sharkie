@@ -1,22 +1,38 @@
 function createLevel1() {
     const level = new Level(
-        [
-            new Endboss() // only endboss manually placed
-        ],
+        [ new Endboss() ],
         createWorldBackground()
     );
 
+    // Zustandsvariablen
+    level.spawningStopped = false;
+    level.cleanupTriggered = false;
+
     level.spawnEnemies = function (character) {
-        // --- stop spawning once Sharkie reaches boss area ---
-        if (character.x >= 7000) return;
+        // --- Wenn der Charakter x ≥ 7000 erreicht ---
+        if (character.x >= 7000) {
+            this.spawningStopped = true;
+        }
+
+        // --- Wenn der Charakter x ≥ 8100 erreicht ---
+        if (character.x >= 8100 && !this.cleanupTriggered) {
+            this.cleanupTriggered = true;
+
+            setTimeout(() => {
+                this.enemies = this.enemies.filter(e => e instanceof Endboss);
+            }, 1000);
+        }
+
+        // --- Wenn Spawning gestoppt wurde, nichts mehr erzeugen ---
+        if (this.spawningStopped) return;
+
+        // --- Normales Spawning ---
         if (character.x < 300) return;
 
-        // --- Dynamische Spawnrate abhängig von Fortschritt ---
         const progress = Math.floor((character.x - 300) / 1000);
-        const spawnChance = 0.4 + Math.min(progress * 0.05, 0.4); // 40% → 80%
+        const spawnChance = 0.4 + Math.min(progress * 0.05, 0.4);
         const spawnCount = Math.min(3 + progress, 10);
 
-        // --- Zufällig entscheiden, ob überhaupt gespawnt wird ---
         if (Math.random() > spawnChance) return;
 
         for (let i = 0; i < spawnCount; i++) {
@@ -34,14 +50,13 @@ function createLevel1() {
             enemy.world = character.world;
             this.enemies.push(enemy);
 
-            // --- Animation & Bewegung starten ---
+            // Animation starten
             if (typeof enemy.animate === 'function')
                 setStoppableIntervals(() => enemy.animate(), 1000 / 6);
+
             if (typeof enemy.startMoving === 'function')
                 setStoppableIntervals(() => {
                     enemy.startMoving();
-
-                    // Entfernen, wenn weit außerhalb des Bildes
                     if (enemy.x < -1000) {
                         const index = this.enemies.indexOf(enemy);
                         if (index !== -1) this.enemies.splice(index, 1);
@@ -49,26 +64,24 @@ function createLevel1() {
                 }, 1000 / 60);
         }
 
-        // --- Endboss dauerhaft sicherstellen ---
+        // --- Endboss sicherstellen ---
         let endboss = this.enemies.find(e => e instanceof Endboss);
         if (!endboss) {
             endboss = new Endboss();
             endboss.world = character.world;
             this.enemies.push(endboss);
-
-            // Endboss sofort aktivieren
             setStoppableIntervals(() => endboss.animate(), 1000 / 6);
         }
 
-        // --- Limit enemies in memory (Boss bleibt immer erhalten) ---
+        // --- Limit enemies ---
         const maxEnemies = 300;
         const nonBossEnemies = this.enemies.filter(e => !(e instanceof Endboss) && !e.dead);
         this.enemies = [endboss, ...nonBossEnemies.slice(-maxEnemies)];
     };
 
-
     return level;
 }
+
 
 
 function randomColor() {

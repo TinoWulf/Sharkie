@@ -1,7 +1,7 @@
 class StatusBar extends DrawableObject {
 
     statusImages = {
-        coins : [
+        coins: [
             'img/4. Marcadores/green/Coin/0_  copia 4.png',
             'img/4. Marcadores/green/Coin/20_  copia 2.png',
             'img/4. Marcadores/green/Coin/40_  copia 4.png',
@@ -9,7 +9,7 @@ class StatusBar extends DrawableObject {
             'img/4. Marcadores/green/Coin/80_  copia 4.png',
             'img/4. Marcadores/green/Coin/100_ copia 4.png'
         ],
-        life : [
+        life: [
             'img/4. Marcadores/green/Life/0_  copia 3.png',
             'img/4. Marcadores/green/Life/20_ copia 4.png',
             'img/4. Marcadores/green/Life/40_  copia 3.png',
@@ -17,7 +17,7 @@ class StatusBar extends DrawableObject {
             'img/4. Marcadores/green/Life/80_  copia 3.png',
             'img/4. Marcadores/green/Life/100_  copia 2.png'
         ],
-        poison : [
+        poison: [
             'img/4. Marcadores/green/poisoned bubbles/0_ copia 2.png',
             'img/4. Marcadores/green/poisoned bubbles/20_ copia 3.png',
             'img/4. Marcadores/green/poisoned bubbles/40_ copia 2.png',
@@ -25,12 +25,20 @@ class StatusBar extends DrawableObject {
             'img/4. Marcadores/green/poisoned bubbles/80_ copia 2.png',
             'img/4. Marcadores/green/poisoned bubbles/100_ copia 3.png'
         ],
-        instructions : [
+        instructions: [
             'img/6.Botones/Instructions 2.png'
-        ]
+        ],
+        volume: {
+            up: [
+                'img/8.Volume/volume-up.png'
+            ],
+            down: [
+                'img/8.Volume/volume-down.png'
+            ]
+        }
     }
 
-    
+
     type; // 'life', 'coins', 'poison', 'instructions'
 
     constructor(type, x, y, height, width) {
@@ -44,25 +52,28 @@ class StatusBar extends DrawableObject {
         this.loadImages(this.statusImages.life);
         this.loadImages(this.statusImages.poison);
         this.loadImages(this.statusImages.instructions);
+        this.loadImages(this.statusImages.volume.up);
+        this.loadImages(this.statusImages.volume.down);
         this.checkType();
     }
 
     checkType() {
         switch (this.type) {
-        case 'life':
-            this.setHealth(100);
-            break;
-        case 'coins':
-            this.setCoins(0);
-            break;
-        case 'poison':
-            this.setPoison(0);
-            break;
-        case 'instructions':
-            this.setInstructions();
-            break;
+            case 'life': this.setHealth(100); break;
+            case 'coins': this.setCoins(0); break;
+            case 'poison': this.setPoison(0); break;
+            case 'instructions': this.setInstructions(); break;
+            case 'volume': this.setVolume(); break;
         }
     }
+
+
+    setVolume() {
+        let images = this.statusImages[this.type].up;
+        let path = images[0];
+        this.img = this.imageCache[path];
+    }
+
 
     setInstructions() {
         let images = this.statusImages[this.type];

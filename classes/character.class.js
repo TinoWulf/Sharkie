@@ -155,7 +155,7 @@ class Character extends MovableObject {
         let kb = this.world.keyboard;
 
         if (kb.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
-            this.x += 3;
+            this.x += 10;
             this.otherDirection = false;
         }
         if (kb.LEFT && this.x > 100 && !this.isDead()) {
@@ -191,6 +191,8 @@ class Character extends MovableObject {
             this.playAttackAnimation();
             setTimeout(() => {
                 this.world.checkThrowableObjects();
+                this.world.playSound('audio/bubble-pop-06-351337.mp3', 0.4);
+
             }, 350);
         }
 

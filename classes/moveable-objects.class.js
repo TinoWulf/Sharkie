@@ -52,17 +52,24 @@ class MovableObject extends DrawableObject {
         if (this instanceof Character) {
             this.world.character.health -= damage;
 
-            if (hittedBy === 'poison') this.isPoisoned = true;
-            if (hittedBy === 'electric') this.isElectrified = true;
-
+            if (hittedBy === 'poison') {
+                this.isPoisoned = true;
+                this.world.playSound('audio/hurt-poisen.wav', 0.4);
+            }
+            if (hittedBy === 'electric') {
+                this.isElectrified = true;
+                this.world.playSound('audio/electric-shock.wav', 0.4);
+            }
             if (this.world.character.health <= 0) {
                 this.world.character.health = 0;
+                this.world.playSound('audio/dead.mp3', 0.4);
             }
         } else {
             this.health -= damage;
             if (this.health <= 0) {
                 this.health = 0;
                 this.dead = true;
+                this.world.playSound('audio/dead.mp3', 0.4);
             }
         }
     }

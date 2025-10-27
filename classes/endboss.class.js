@@ -63,6 +63,7 @@ class Endboss extends MovableObject {
     dead = false;
     isDying = false;        // wurde Sterbeablauf gestartet?
     isPlayingDead = false;
+    endbossIntroducingSound = false;
 
     attackOffset = { top: 190, bottom: 80, left: -60, right: -20 };
     bubbleOffset = { top: 200, bottom: 100, left: 60, right: 60 };
@@ -149,6 +150,7 @@ class Endboss extends MovableObject {
         // 4) Introduce
         if (this.world.character.x > 8100 && !this.introduced) {
             this.playAnimation(this.imagesEndboss.introduce);
+            this.playEndbossSounds();
             if (this.currentImageIndex % this.imagesEndboss.introduce.length === this.imagesEndboss.introduce.length - 1) {
                 this.introduced = true;
                 this.currentImageIndex = 0;
@@ -206,6 +208,14 @@ class Endboss extends MovableObject {
             width: this.width - this.bubbleOffset.left - this.bubbleOffset.right,
             height: this.height - this.bubbleOffset.top - this.bubbleOffset.bottom
         };
+    }
+
+    playEndbossSounds() {
+        if (!this.endbossIntroducingSound) {
+            this.world.playSound('audio/introducing endboss.mp3', 0.4);
+            this.world.playSound('audio/water splash.mp3', 0.4);
+            this.endbossIntroducingSound = true;
+        }
     }
 
     drawHitboxes(ctx) {

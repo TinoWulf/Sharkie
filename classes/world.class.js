@@ -9,11 +9,13 @@ class World {
     camera_x = -100;
     collidingImunity = false;
     gameOver = false;
+    isMuted = false;
 
     statusBar = [new StatusBar('life', 10, 0, 50, 200),
     new StatusBar('coins', 10, 40, 50, 200),
     new StatusBar('poison', 10, 80, 50, 200),
-    new StatusBar('instructions', 0, 330, 150, 300)
+    new StatusBar('instructions', 0, 330, 150, 300),
+    new StatusBar('volume', 970, 10, 40, 40)
     ];
     throwableObject = [new Throwable()];
     collectableObjects = [
@@ -36,13 +38,17 @@ class World {
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.draw();
+
+        this.initVolumeButton();
+
+
         this.checkCollisions();
         this.character.world = this;
         this.level.enemies.forEach(enemy => enemy.world = this);
         setStoppableIntervals(() => this.character.moveCharacter(), 1000 / 60);
         setStoppableIntervals(() => this.character.animate(), 100);
         setStoppableIntervals(() => this.run(), 1000 / 60);
-        setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
+        //setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
         this.collectableObjects.push(...Collectable.spawnBatch(15, 'coin'));
     }
 
@@ -68,6 +74,7 @@ class World {
         this.checkCollisions();
         this.popup();
         this.checkGameOver();
+        this.checkMusicSwitch();
         console.log(this.character.x);
     }
 
@@ -138,9 +145,12 @@ class World {
                     }
                     this.statusBar[0].setHealth(this.character.health); // Always update health display
                     setTimeout(() => { // Schedule immunity reset
+                        if (this.character.bitingSharkie) {
+                            this.playSound('audio/enboss bite.wav', 0.4);
+                        }
                         this.collidingImunity = false; // Remove invincibility
                         this.character.bitingSharkie = false; // Stop bite animation
-                    }, 1200); // Immunity lasts for 1.2 seconds
+                    }, 500); // Immunity lasts for 1.2 seconds
                 }
             });
         }
@@ -155,6 +165,8 @@ class World {
                     if (throwable.isCollidingWithBox(enemy.getBubbleHitbox())) { // If bubble hits the green (vulnerable) hitbox
                         enemy.hit(20, 'bubble'); // Apply bubble damage to the boss
                         this.throwableObject.splice(i, 1); // Remove the bubble from the array
+                        this.playSound('audio/hit enemy.mp3', 0.4);
+                        this.playSound('audio/endboss hurt.mp3', 0.4);
                         break; // Exit inner loop and go to next bubble
                     }
                     continue; // Skip checking the red box — it should not remove the bubble
@@ -166,6 +178,7 @@ class World {
                         enemy.hit(20, 'bubble'); // Apply bubble damage just in case
                     } else { // Normal enemy logic
                         enemy.dead = true; // Mark enemy as dead
+                        this.playSound('audio/hit enemy.mp3', 0.4);
                         setTimeout(() => { // Remove enemy from level after short delay
                             this.level.enemies.splice(j, 1); // Delete enemy from array
                         }, 500);
@@ -242,5 +255,68 @@ class World {
             boxA.y + boxA.height > boxB.y
         );
     }
+
+    initVolumeButton() {
+        this.canvas.addEventListener('click', (event) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            const volumeBar = this.statusBar.find(s => s.type === 'volume');
+            if (
+                mouseX >= volumeBar.x &&
+                mouseX <= volumeBar.x + volumeBar.width &&
+                mouseY >= volumeBar.y &&
+                mouseY <= volumeBar.y + volumeBar.height
+            ) {
+                this.toggleVolume();
+            }
+        });
+    }
+
+
+    toggleVolume() {
+        this.playSound('audio/volume-up.wav', 0.5);
+        // Zustand umschalten (laut/leise)
+        this.isMuted = !this.isMuted;
+        // Passendes Volume-Icon auswählen
+        const volumeBar = this.statusBar.find(s => s.type === 'volume');
+        const imagePath = this.isMuted
+            ? volumeBar.statusImages.volume.down[0]
+            : volumeBar.statusImages.volume.up[0];
+        volumeBar.img = volumeBar.imageCache[imagePath];
+
+        if (window.world && window.world.backgroundMusic) {
+            window.world.backgroundMusic.muted = this.isMuted;
+        }
+        this.playSound('audio/volume-up.wav', 0.5);
+    }
+
+    playSound(path, volume) {
+        let sound = new Audio(path);
+        sound.volume = volume;
+        if (world.isMuted) {
+            sound.muted = true;
+        }
+        sound.play();
+    }
+
+    checkMusicSwitch() {
+        if (!this.bossMusicStarted && this.character.x >= 8100) {
+            // Hintergrundmusik stoppen
+            if (this.backgroundMusic) {
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0;
+            }
+            // Boss-Musik starten
+            if (this.bossMusic) {
+                this.bossMusic.play();
+            }
+            this.bossMusicStarted = true;
+        }
+    }
+
+
+
 
 }

@@ -191,14 +191,17 @@ class World {
             if (this.character.isColliding(collectable) && !collectable.collected) {
                 if (collectable.imageType.coin.includes('Coin') || collectable.constructor.name === 'Collectable' && collectable.type === 'coin') {
                     this.statusBar[1].setCoins(this.statusBar[1].coins + 20);
+                    this.playSound('audio/collect coin (2).mp3', 0.4);
                     collectable.collected = true;
                 }
                 else if (collectable.imageType.life.includes('Life') || collectable.type === 'life') {
                     this.statusBar[0].setHealth(this.statusBar[0].health + 20);
+                    this.playSound('audio/collect health.wav', 0.3);
                     collectable.collected = true;
                 }
                 else if (collectable.imageType.poison.includes('poison') || collectable.type === 'poison') {
                     this.statusBar[2].setPoison(this.statusBar[2].poison + 20);
+                    this.playSound('audio/collect poison.mp3', 0.4);
                     collectable.collected = true;
                 }
             }

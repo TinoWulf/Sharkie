@@ -19,17 +19,17 @@ class World {
     ];
     throwableObject = [new Throwable()];
     collectableObjects = [
-        new Collectable(1500, 400, 'life'),
         new Collectable(3000, 400, 'life'),
-        new Collectable(4000, 400, 'life'),
-        new Collectable(6000, 400, 'life'),
+        new Collectable(3900, 400, 'life'),
+        new Collectable(4760, 400, 'life'),
+        new Collectable(7400, 400, 'life'),
         new Collectable(8000, 400, 'life'),
         new Collectable(9000, 400, 'life'),
-        new Collectable(600, 400, 'poison'),
+        new Collectable(1900, 400, 'poison'),
         new Collectable(2300, 400, 'poison'),
         new Collectable(3150, 400, 'poison'),
-        new Collectable(600, 400, 'poison'),
-        new Collectable(600, 400, 'poison')
+        new Collectable(6000, 400, 'poison'),
+        new Collectable(7000, 400, 'poison')
     ];
 
     constructor(canvas, keyboard) {
@@ -48,7 +48,7 @@ class World {
         setStoppableIntervals(() => this.character.moveCharacter(), 1000 / 60);
         setStoppableIntervals(() => this.character.animate(), 100);
         setStoppableIntervals(() => this.run(), 1000 / 60);
-        //setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
+        setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
         this.collectableObjects.push(...Collectable.spawnBatch(15, 'coin'));
     }
 

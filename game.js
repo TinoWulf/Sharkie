@@ -15,7 +15,8 @@ window.addEventListener('DOMContentLoaded', () => {
         '#backToMenu',
         '#changingBtn',
         '.endScreenBtn',
-        '#descriptionBtn'
+        '#descriptionBtn',
+        '#closeDescriptionBtn'
     ];
 
     clickableButtons.forEach(selector => {
@@ -55,8 +56,9 @@ function backToMenu() {
     document.getElementById('endScreenBtns').style.display = 'none';
     document.getElementById('backToMenu').style.display = 'none';
     document.getElementById('startBtn').style.display = 'flex';
-    document.getElementById('startText').style.display = 'flex';
+    document.getElementById('excuseText').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'flex';
+    document.getElementById('descriptionBtn').style.display = 'flex';
 }
 
 function openDescription() {
@@ -65,11 +67,13 @@ function openDescription() {
     const startHeadline = document.getElementById('startHeadline');
     const descriptionBtn = document.getElementById('descriptionBtn');
     const startText = document.getElementById('startText');
+    const infoTable = document.getElementById('infoTable');
     startBtn.style.display = 'none';
     startHeadline.style.display = 'none';
     descriptionBtn.style.display = 'none';
     description.style.display = 'flex';
-    description.innerHTML = `
+    infoTable.scrollTop = 0;
+    infoTable.innerHTML = `
         <p id="startText">
             Join Sharkie on an epic underwater adventure through vibrant coral caves and dark ocean trenches.
             Battle fierce jellyfish, sneaky pufferfish, and the mighty Endboss lurking in the deep.
@@ -77,71 +81,69 @@ function openDescription() {
             Can you help Sharkie reclaim the seas?
         </p>
 
-        <div id="infoTable">
-            <h2>Movement Overview</h2>
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Swim</h3>
-                    <p>Move Sharkie freely through the ocean using the arrow keys or WASD.</p>
-                </div>
-                <img src="img/6.Botones/Key/arrow keys.png" alt="Sharkie Swimming">
+    
+        <h2>Movement Overview</h2>
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Swim</h3>
+                <p>Move Sharkie freely through the ocean using the arrow keys or WASD.</p>
             </div>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Attack</h3>
-                    <p>Press the spacebar to shoot bubbles and defeat enemies in your way.</p>
-                </div>
-                <img src="img/6.Botones/Key/Space Bar key.png" alt="Sharkie Attack">
-            </div>
-
-            <h2>Enemies Overview</h2>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Puffer Fish</h3>
-                    <p>It looks cute, however, these spiky fish puff up when threatened. Stay away or attack from distance!</p>
-                </div>
-                <img src="img/2.Enemy/1.Puffer fish (3 color options)/1.Swim/1.swim5.png" alt="Puffer Fish">
-            </div>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Jelly Fish Lila</h3>
-                    <p>They float up and down gracefully but can electrocute Sharkie on contact.
-                    It is the yellow-purple form of the jellyfish and is considered a normal jellyfish, it is more common</p>
-                </div>
-                <img src="img/2.Enemy/2 Jelly fish/Regular damage/Lila 1.png" alt="Jelly Fish">
-            </div>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Jelly Fish Yellow</h3>
-                    <p>They also can electrocute Sharkie on contact but float up and down significantly faster, which makes it so dangerous.
-                    It should not be underestimated.</p>
-                </div>
-                <img src="img/2.Enemy/2 Jelly fish/Regular damage/Yellow 1.png" alt="Jelly Fish">
-            </div>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Jelly Fish Green</h3>
-                    <p>It's the most dangerous of all sea creatures.
-                    One sting from here and you'll die instantly! But fortunately it is less common</p>
-                </div>
-                <img src="img/2.Enemy/2 Jelly fish/Súper dangerous/Green 1.png" alt="Jelly Fish">
-            </div>
-
-            <div class="info-row">
-                <div class="info-text">
-                    <h3>Endboss</h3>
-                    <p>The mighty ruler of the deep sea. Beware its massive size and deadly attacks!</p>
-                </div>
-                <img src="img/2.Enemy/3 Final Enemy/2.floating/5.png" alt="Endboss">
-            </div>
-
-            <div id="closeDescriptionBtn" class="endScreenBtn" onclick="closeDescription()">Close Description</div>
+            <img src="img/6.Botones/Key/arrow keys.png" alt="Sharkie Swimming">
         </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Attack</h3>
+                <p>Press the spacebar to shoot bubbles and defeat enemies in your way.</p>
+            </div>
+            <img src="img/6.Botones/Key/Space Bar key.png" alt="Sharkie Attack">
+        </div>
+
+        <h2>Enemies Overview</h2>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Puffer Fish</h3>
+                <p>It looks cute, however, these spiky fish puff up when threatened. Stay away or attack from distance!</p>
+            </div>
+            <img src="img/2.Enemy/1.Puffer fish (3 color options)/1.Swim/1.swim5.png" alt="Puffer Fish">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Jelly Fish Lila</h3>
+                <p>They float up and down gracefully but can electrocute Sharkie on contact.
+                It is the yellow-purple form of the jellyfish and is considered a normal jellyfish, it is more common</p>
+            </div>
+            <img src="img/2.Enemy/2 Jelly fish/Regular damage/Lila 1.png" alt="Jelly Fish">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Jelly Fish Yellow</h3>
+                <p>They also can electrocute Sharkie on contact but float up and down significantly faster, which makes it so dangerous.
+                It should not be underestimated.</p>
+            </div>
+            <img src="img/2.Enemy/2 Jelly fish/Regular damage/Yellow 1.png" alt="Jelly Fish">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Jelly Fish Green</h3>
+                <p>It's the most dangerous of all sea creatures.
+                One sting from here and you'll die instantly! But fortunately it is less common</p>
+            </div>
+            <img src="img/2.Enemy/2 Jelly fish/Súper dangerous/Green 1.png" alt="Jelly Fish">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Endboss</h3>
+                <p>The mighty ruler of the deep sea. Beware its massive size and deadly attacks!</p>
+            </div>
+            <img src="img/2.Enemy/3 Final Enemy/2.floating/5.png" alt="Endboss">
+        </div>
+    
     `;
 }
 
@@ -150,8 +152,9 @@ function closeDescription() {
     const startBtn = document.getElementById('startBtn');
     const startHeadline = document.getElementById('startHeadline');
     const descriptionBtn = document.getElementById('descriptionBtn');
+    const infoTable = document.getElementById('infoTable');
     description.style.display = 'none';
-    description.innerHTML = '';
+    infoTable.innerHTML = '';
     startBtn.style.display = 'flex';
     startHeadline.style.display = 'flex';
     descriptionBtn.style.display = 'flex';
@@ -201,9 +204,9 @@ function endGame(output) {
 function nextGame() {
     canvas.style.display = 'none';
     document.getElementById('endScreen').style.display = 'none';
-    document.getElementById('startText').style.display = 'flex';
+    document.getElementById('excuseText').style.display = 'flex';
     document.getElementById('backToMenu').style.display = 'flex';
-    document.getElementById('startText').innerHTML = 'Unfortunately, no further levels exist yet, as the game is currently in alpha. However, you can replay the same level.';
+    document.getElementById('excuseText').innerHTML = 'Unfortunately, no further levels exist yet, as the game is currently in alpha. However, you can replay the same level.';
 }
 
 

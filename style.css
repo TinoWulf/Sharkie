@@ -1,6 +1,7 @@
 canvas {
     background-color: black;
     padding: 5px 5px;
+    display: block;
 }
 
 body {
@@ -47,6 +48,7 @@ h1 {
 
 #startHeadline {
     margin-bottom: 100px;
+    text-align: center;
 }
 
 #descriptionBtn {

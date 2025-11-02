@@ -155,7 +155,7 @@ class Character extends MovableObject {
         let kb = this.world.keyboard;
 
         if (kb.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
-            this.x += 10;
+            this.x += 3;
             this.otherDirection = false;
         }
         if (kb.LEFT && this.x > 100 && !this.isDead()) {

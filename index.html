@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="icon" href="img/7.menu/under-water-background.jpg">
+    <link rel="icon" href="img/1.Sharkie/1.IDLE/1.png" type="image/x-icon" />
     <link rel="stylesheet" href="style.css">
     <script src="./classes/keyboard.class.js"></script>
     <script src="game.js"></script>
@@ -21,11 +23,13 @@
     <script src="./classes/collectable.class.js"></script>
     <script src="./classes/level.class.js"></script>
     <script src="./levels/level1.js"></script>
+
 </head>
 
 <body onload="init()">
     <h1>Sharkie</h1>
     <h2 id="startHeadline"></h2>
+    <p id="excuseText" style="display: none;"></p>
     <img onclick="startGame()" src="img/6.Botones/Start/1.png" alt="Start" id="startBtn">
     <div id="descriptionBtn" class="endScreenBtn" onclick="openDescription()">What is Sharkie?</div>
     <div class="endScreenBtn" id="backToMenu" onclick="backToMenu()" style="display: none;">Back to Menu</div>
@@ -39,7 +43,8 @@
     </div>
     <div id="description" style="display: none;">
         <p id="startText"></p>
-
+        <div id="infoTable"></div>
+        <div id="closeDescriptionBtn" class="endScreenBtn" onclick="closeDescription()">Close Description</div>
     </div>
 </body>
 

@@ -31,6 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 function startGame() {
+    checkScreenScale();
     intervals.forEach(id => clearInterval(id));
     intervals = [];
     world = null;
@@ -39,6 +40,7 @@ function startGame() {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.style.display = 'flex';
+    canvas.classList.add('active');
     document.getElementById('startBtn').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'none';
     document.getElementById('endScreen').style.display = 'none';
@@ -48,10 +50,17 @@ function startGame() {
     playBackgroundMusik();
 }
 
+function checkScreenScale() {
+    if (window.matchMedia("(max-height: 480px)")) {
+        document.getElementById('gameHeadline').style.display = 'none';
+    } return
+}
+
 
 function backToMenu() {
     init();
     canvas.style.display = 'none';
+    canvas.classList.remove('active');
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     document.getElementById('backToMenu').style.display = 'none';
@@ -59,14 +68,15 @@ function backToMenu() {
     document.getElementById('excuseText').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'flex';
     document.getElementById('descriptionBtn').style.display = 'flex';
+    document.getElementById('gameHeadline').style.display = 'flex';
 }
 
 function openDescription() {
+    checkScreenScale();
     const description = document.getElementById('description');
     const startBtn = document.getElementById('startBtn');
     const startHeadline = document.getElementById('startHeadline');
     const descriptionBtn = document.getElementById('descriptionBtn');
-    const startText = document.getElementById('startText');
     const infoTable = document.getElementById('infoTable');
     startBtn.style.display = 'none';
     startHeadline.style.display = 'none';
@@ -153,11 +163,13 @@ function closeDescription() {
     const startHeadline = document.getElementById('startHeadline');
     const descriptionBtn = document.getElementById('descriptionBtn');
     const infoTable = document.getElementById('infoTable');
+    const gameHeadline = document.getElementById('gameHeadline');
     description.style.display = 'none';
     infoTable.innerHTML = '';
     startBtn.style.display = 'flex';
     startHeadline.style.display = 'flex';
     descriptionBtn.style.display = 'flex';
+    gameHeadline.style.display = 'flex';
 }
 
 

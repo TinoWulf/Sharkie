@@ -262,15 +262,24 @@ class World {
     initVolumeButton() {
         this.canvas.addEventListener('click', (event) => {
             const rect = this.canvas.getBoundingClientRect();
+
+            // Mausposition relativ zum Canvas
             const mouseX = event.clientX - rect.left;
             const mouseY = event.clientY - rect.top;
 
+            // Verhältnis von skaliertem Canvas zu Original
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+
+            const canvasX = mouseX * scaleX;
+            const canvasY = mouseY * scaleY;
+
             const volumeBar = this.statusBar.find(s => s.type === 'volume');
             if (
-                mouseX >= volumeBar.x &&
-                mouseX <= volumeBar.x + volumeBar.width &&
-                mouseY >= volumeBar.y &&
-                mouseY <= volumeBar.y + volumeBar.height
+                canvasX >= volumeBar.x &&
+                canvasX <= volumeBar.x + volumeBar.width &&
+                canvasY >= volumeBar.y &&
+                canvasY <= volumeBar.y + volumeBar.height
             ) {
                 this.toggleVolume();
             }

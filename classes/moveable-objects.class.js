@@ -12,11 +12,14 @@ class MovableObject extends DrawableObject {
     health = 100;
 
     getHitbox() {
+        // Ensure offset fields exist (fallback to 0) to avoid NaN when a caller
+        // assigns a partial offset object.
+        const off = Object.assign({ top: 0, bottom: 0, left: 0, right: 0 }, this.offset || {});
         return {
-            x: this.x + this.offset.left,
-            y: this.y + this.offset.top,
-            width: this.width - this.offset.left - this.offset.right,
-            height: this.height - this.offset.top - this.offset.bottom
+            x: this.x + off.left,
+            y: this.y + off.top,
+            width: this.width - off.left - off.right,
+            height: this.height - off.top - off.bottom
         };
     }
 

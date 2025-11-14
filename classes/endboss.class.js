@@ -56,12 +56,12 @@ class Endboss extends MovableObject {
 
     currentImageIndex = 0;
     introduced = false;
-    speed = 15;           // Startgeschwindigkeit
-    speedDirection = 5;  // 1 = erhöhen, -1 = verringern
+    speed = 15;
+    speedDirection = 5;
     maxSpeed = 25;
     minSpeed = 10;
     dead = false;
-    isDying = false;        // wurde Sterbeablauf gestartet?
+    isDying = false;
     isPlayingDead = false;
     endbossIntroducingSound = false;
 
@@ -87,30 +87,28 @@ class Endboss extends MovableObject {
     }
 
     hit(damage) {
-        if (this.dead || this.isDying) return; // bereits tot oder stirbt gerade
-
+        if (this.dead || this.isDying) return;
         this.health -= damage;
         this.lastHit = new Date().getTime();
-        this.hurtTime = this.lastHit; // Zeitstempel für Hurt-Status
-
-        // Hurt-Zustand für 500 ms aktiv halten
+        this.hurtTime = this.lastHit;
         this.isCurrentlyHurt = true;
         setTimeout(() => {
             this.isCurrentlyHurt = false;
         }, 900);
+    this.playIsDyingSequence();
+    }
 
-        // Falls Lebenspunkte <= 0, Sterbeablauf erst starten, nicht sofort "dead"
+
+    playIsDyingSequence() {
         if (this.health <= 0 && !this.isDying) {
             this.health = 0;
             this.isDying = true;
-
-            // Hurt kurz zeigen, dann dead starten
             setTimeout(() => {
                 this.isPlayingDead = true;
             }, 1000);
-
-            // stillDead erst nach Dead-Animation setzen
             setTimeout(() => {
+                console.log('check');
+                
                 this.dead = true;
                 this.isDying = false;
                 this.isPlayingDead = false;
@@ -120,45 +118,11 @@ class Endboss extends MovableObject {
 
     animate() {
         if (!this.world || this.world.character.isDead()) return;
-        // 1) Wenn tot → stillDead anzeigen
-        if (this.dead) {
-            this.playAnimation(this.imagesEndboss.stillDead);
-            return;
-        }
-
-        // 2) Wenn gerade stirbt → Dead oder Hurt
-        if (this.isDying) {
-            if (this.isPlayingDead) {
-                this.playAnimation(this.imagesEndboss.dead);
-            } else {
-                this.playAnimation(this.imagesEndboss.hurt);
-            }
-            return;
-        }
-
-        // 3) Wenn verletzt (nicht tot)
-        if (this.isCurrentlyHurt) {
-            this.playAnimation(this.imagesEndboss.hurt);
-            return;
-        }
-
-        if (this.world.character.bitingSharkie) {
-            this.playAnimation(this.imagesEndboss.attacking);
-            return;
-        }
-
-        // 4) Introduce
-        if (this.world.character.x > 8100 && !this.introduced) {
-            this.playAnimation(this.imagesEndboss.introduce);
-            this.playEndbossSounds();
-            if (this.currentImageIndex % this.imagesEndboss.introduce.length === this.imagesEndboss.introduce.length - 1) {
-                this.introduced = true;
-                this.currentImageIndex = 0;
-            }
-            return;
-        }
-
-        // 5) Normal bewegen
+        if (this.dead) { this.playAnimation(this.imagesEndboss.stillDead); return }
+        if (this.isDying) { this.playIsDyingAnimation(); return }
+        if (this.isCurrentlyHurt) { this.playAnimation(this.imagesEndboss.hurt); return }
+        if (this.world.character.bitingSharkie) { this.playAnimation(this.imagesEndboss.attacking); return }
+        if (this.world.character.x > 8100 && !this.introduced) { this.playEndbossIntroducing(); return }
         if (this.introduced) {
             this.playAnimation(this.imagesEndboss.floating);
             this.moveTowardsCharacter();
@@ -166,31 +130,55 @@ class Endboss extends MovableObject {
     }
 
 
+    playIsDyingAnimation() {
+        if (this.isPlayingDead) {
+            this.playAnimation(this.imagesEndboss.dead);
+        } else {
+            this.playAnimation(this.imagesEndboss.hurt);
+        }
+    }
+
+
+    playEndbossIntroducing() {
+        this.playAnimation(this.imagesEndboss.introduce);
+        this.playEndbossSounds();
+        if (this.currentImageIndex % this.imagesEndboss.introduce.length === this.imagesEndboss.introduce.length - 1) {
+            this.introduced = true;
+            this.currentImageIndex = 0;
+        }
+    }
+
+
     moveTowardsCharacter() {
         const character = this.world.character;
-
-        // --- Dynamische Geschwindigkeit ---
-        this.speed += 0.02 * this.speedDirection;  // leicht erhöhen oder verringern
+        this.speed += 0.02 * this.speedDirection;
         if (this.speed > this.maxSpeed || this.speed < this.minSpeed) {
-            this.speedDirection *= -1; // Richtungswechsel
+            this.speedDirection *= -1;
         }
+        this.moveHorizontal(character);
+        this.moveVertical(character);
+    }
 
-        // Horizontale Bewegung
-        if (character.x < this.x) {
-            this.otherDirection = false; // nach links schauen
-            this.x -= this.speed;
-        } else {
-            this.otherDirection = true;  // nach rechts schauen
-            this.x += this.speed;
-        }
 
-        // Vertikale Bewegung (zielt auf Character)
+    moveVertical(character) {
         if (character.y + character.height / 2 < this.y + this.height / 2) {
             this.y -= this.speed / 2;
         } else if (character.y + character.height / 2 > this.y + this.height / 2) {
             this.y += this.speed / 2;
         }
     }
+
+
+    moveHorizontal(character) {
+        if (character.x < this.x) {
+            this.otherDirection = false;
+            this.x -= this.speed;
+        } else {
+            this.otherDirection = true;
+            this.x += this.speed;
+        }
+    }
+
 
     getAttackHitbox() {
         return {
@@ -201,6 +189,7 @@ class Endboss extends MovableObject {
         };
     }
 
+
     getBubbleHitbox() {
         return {
             x: this.x + this.bubbleOffset.left,
@@ -210,6 +199,7 @@ class Endboss extends MovableObject {
         };
     }
 
+
     playEndbossSounds() {
         if (!this.endbossIntroducingSound) {
             this.world.playSound('audio/introducing endboss.mp3', 0.4);
@@ -218,8 +208,9 @@ class Endboss extends MovableObject {
         }
     }
 
-    drawHitboxes(ctx) {
-        // Angriffshitbox (rot)
+
+    /*drawHitboxes(ctx) {
+        // Attackbox red
         const attackBox = this.getAttackHitbox();
         ctx.beginPath();
         ctx.lineWidth = 3;
@@ -227,12 +218,12 @@ class Endboss extends MovableObject {
         ctx.rect(attackBox.x, attackBox.y, attackBox.width, attackBox.height);
         ctx.stroke();
 
-        // Bubble-Hitbox (grün)
+        // Bubblehitbox green
         const bubbleBox = this.getBubbleHitbox();
         ctx.beginPath();
         ctx.lineWidth = 3;
         ctx.strokeStyle = 'green';
         ctx.rect(bubbleBox.x, bubbleBox.y, bubbleBox.width, bubbleBox.height);
         ctx.stroke();
-    }
+    }*/
 }

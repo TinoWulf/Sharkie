@@ -153,7 +153,12 @@ class Character extends MovableObject {
 
     moveCharacter() {
         let kb = this.world.keyboard;
+        this.isMoving(kb);
+        this.isNotMoving(kb);
+        this.world.camera_x = -this.x + 100; // camera follows character
+    }
 
+    isMoving(kb) {
         if (kb.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
             this.x += 3;
             this.otherDirection = false;
@@ -168,6 +173,9 @@ class Character extends MovableObject {
         if (kb.DOWN && this.y < this.world.canvas.height - this.height + 50 && !this.isDead()) {
             this.y += 2;
         }
+    }
+
+    isNotMoving(kb) {
         if (!kb.RIGHT && !kb.LEFT && !kb.UP && !kb.DOWN && !this.isDead() && !this.isAttacking && !this.isHurt()) {
             let currentTime = new Date().getTime();
             let timeSinceLastKeyPress = currentTime - this.lastKeyPressTime;
@@ -179,66 +187,87 @@ class Character extends MovableObject {
             this.isFallingAsleep = false;
             this.isSleeping = false;
         }
-        this.world.camera_x = -this.x + 100; // camera follows character
     }
 
     animate() {
-        // --- ATTACK START ---
         if (this.world.keyboard.SPACE && !this.isHurt() && !this.isDead() && !this.isAttacking && !this.waitingForAttack) {
-            this.isAttacking = true;
-            this.waitingForAttack = true;
-            this.currentImageIndex = 0;
-            this.playAttackAnimation();
-            setTimeout(() => {
-                this.world.checkThrowableObjects();
-                this.world.playSound('audio/bubble-pop-06-351337.mp3', 0.4);
-
-            }, 350);
+            this.characterIsAttacking();
         }
-
         else if (!this.isAttacking) {
-            if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
+            this.characterAnimationWithoutAttacking();
+        }
+    }
+
+    characterAnimationWithoutAttacking() {
+        if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
                 this.playAnimation(this.imagesCharacter.swimming);
             } else if (this.isDead() && !this.deadByElectric && !this.deadByPoison) {
-                if (this.isPoisoned) {
-                    this.playAnimation(this.imagesCharacter.dead.poisoned);
-                    if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
-                        this.deadByPoison = true;
-                        this.currentImageIndex = 0;
-                    }
-                } else if (this.isElectrified) {
-                    this.playAnimation(this.imagesCharacter.dead.electric);
-                    if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
-                        this.deadByElectric = true;
-                        this.currentImageIndex = 0;
-                    }
-                }
+                this.characterIsDeadBy();
             } else if (this.deadByPoison) {
                 this.playAnimation(this.imagesCharacter.stillDead.poisoned);
             } else if (this.deadByElectric) {
                 this.playAnimation(this.imagesCharacter.stillDead.electric);
             } else if (this.isFallingAsleep && !this.isSleeping) {
-                this.playAnimation(this.imagesCharacter.fallAsleep);
+                this.characterIsSleeping();
+            } else if (this.isHurt() && this.isPoisoned) {
+                this.characterIsHurtByPoison();
+            } else if (this.isHurt() && this.isElectrified) {
+                this.characterIsHurtByElectric();
+            } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
+                this.playAnimation(this.imagesCharacter.standing);
+            }
+    }
+
+    characterIsAttacking() {
+        this.isAttacking = true;
+        this.waitingForAttack = true;
+        this.currentImageIndex = 0;
+        this.playAttackAnimation();
+        setTimeout(() => {
+            this.world.checkThrowableObjects();
+            this.world.playSound('audio/bubble-pop-06-351337.mp3', 0.4);
+
+        }, 350);
+    }
+
+    characterIsDeadBy() {
+        if (this.isPoisoned) {
+            this.playAnimation(this.imagesCharacter.dead.poisoned);
+            if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
+                this.deadByPoison = true;
+                this.currentImageIndex = 0;
+            }
+        } else if (this.isElectrified) {
+            this.playAnimation(this.imagesCharacter.dead.electric);
+            if (this.currentImageIndex % this.imagesCharacter.dead.poisoned.length === this.imagesCharacter.dead.poisoned.length - 1) {
+                this.deadByElectric = true;
+                this.currentImageIndex = 0;
+            }
+        }
+    }
+
+    characterIsSleeping() {
+        this.playAnimation(this.imagesCharacter.fallAsleep);
                 if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
                     this.isSleeping = true;
                     this.isFallingAsleep = false;
                     this.currentImageIndex = 0;
                     this.playSleepingAnimation();
                 }
-            } else if (this.isHurt() && this.isPoisoned) {
-                this.playAnimation(this.imagesCharacter.hurtPoisoned);
+    }
+
+    characterIsHurtByPoison() {
+        this.playAnimation(this.imagesCharacter.hurtPoisoned);
                 setTimeout(() => {
                     if (!this.isHurt()) this.isPoisoned = false;
                 }, 1200);
-            } else if (this.isHurt() && this.isElectrified) {
-                this.playAnimation(this.imagesCharacter.hurtElectric);
+    }
+
+    characterIsHurtByElectric() {
+        this.playAnimation(this.imagesCharacter.hurtElectric);
                 setTimeout(() => {
                     if (!this.isHurt()) this.isElectrified = false;
                 }, 1200);
-            } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
-                this.playAnimation(this.imagesCharacter.standing);
-            }
-        }
     }
 
     playSleepingAnimation() {

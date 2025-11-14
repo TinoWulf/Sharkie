@@ -10,14 +10,7 @@ function init() {
 
 
 window.addEventListener('DOMContentLoaded', () => {
-    const clickableButtons = [
-        '#startBtn',
-        '#backToMenu',
-        '#changingBtn',
-        '.endScreenBtn',
-        '#descriptionBtn',
-        '#closeDescriptionBtn'
-    ];
+    const clickableButtons = ['#startBtn', '#backToMenu', '#changingBtn', '.endScreenBtn', '#descriptionBtn', '#closeDescriptionBtn', '#impressumBtn'];
 
     clickableButtons.forEach(selector => {
         document.querySelectorAll(selector).forEach(btn => {
@@ -29,6 +22,84 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
+window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") {
+        keyboard.RIGHT = true;
+    }
+    if (e.key === "ArrowLeft") {
+        keyboard.LEFT = true;
+    }
+    if (e.key === "ArrowUp") {
+        keyboard.UP = true;
+    }
+    if (e.key === "ArrowDown") {
+        keyboard.DOWN = true;
+    }
+    if (e.key === " ") {
+        keyboard.SPACE = true;
+    }
+    if (e.key === "d") {
+        keyboard.D = true;
+    }
+    if (e.key === "w") {
+        keyboard.W = true;
+    }
+});
+
+
+window.addEventListener("keyup", (e) => {
+    if (e.key === "ArrowRight") {
+        keyboard.RIGHT = false;
+    }
+    if (e.key === "ArrowLeft") {
+        keyboard.LEFT = false;
+    }
+    if (e.key === "ArrowUp") {
+        keyboard.UP = false;
+    }
+    if (e.key === "ArrowDown") {
+        keyboard.DOWN = false;
+    }
+    if (e.key === " ") {
+        keyboard.SPACE = false;
+    }
+    if (e.key === "d") {
+        keyboard.D = false;
+    }
+    if (e.key === "w") {
+        keyboard.W = false;
+    }
+});
+
+
+function loadImpressum() {
+    const impressumDiv = document.getElementById('impressum');
+    const impressumBtn = document.getElementById('impressumBtn');
+    if (impressumDiv.style.display === 'none') {
+        showImpressum(impressumBtn, impressumDiv);
+    } else {
+        hideImpressum(impressumBtn, impressumDiv);
+    }
+    impressumDiv.innerHTML = loadImpressumHtml();
+}
+
+function showImpressum(impressumBtn, impressumDiv) {
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('descriptionBtn').style.display = 'none';
+    document.getElementById('startHeadline').style.display = 'none';
+    document.getElementById('gameHeadline').style.display = 'none';
+    impressumDiv.style.display = 'flex';
+    impressumBtn.innerText = 'Close Impressum';
+}
+
+function hideImpressum(impressumBtn, impressumDiv) {
+    impressumDiv.style.display = 'none';
+    impressumBtn.innerText = 'Impressum';
+    document.getElementById('startBtn').style.display = 'flex';
+    document.getElementById('descriptionBtn').style.display = 'flex';
+    document.getElementById('startHeadline').style.display = 'flex';
+    document.getElementById('gameHeadline').style.display = 'flex';
+}
 
 function startGame() {
     checkScreenScale();
@@ -41,19 +112,25 @@ function startGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     canvas.style.display = 'flex';
     canvas.classList.add('active');
+    hideMenuElements();
+    world = new World(canvas, keyboard);
+    playBackgroundMusic();
+}
+
+function hideMenuElements() {
     document.getElementById('startBtn').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'none';
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     document.getElementById('descriptionBtn').style.display = 'none';
-    world = new World(canvas, keyboard);
-    playBackgroundMusik();
+    document.getElementById('impressumBtn').style.display = 'none';
 }
 
 function checkScreenScale() {
-    if (window.matchMedia("(max-height: 480px)")) {
+    if (window.matchMedia("(max-height: 480px)").matches) {
         document.getElementById('gameHeadline').style.display = 'none';
-    } return
+        document.getElementById('touch-controls').style.display = 'flex';
+    }
 }
 
 
@@ -64,26 +141,185 @@ function backToMenu() {
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
     document.getElementById('backToMenu').style.display = 'none';
+    document.getElementById('touch-controls').style.display = 'none';
     document.getElementById('startBtn').style.display = 'flex';
     document.getElementById('excuseText').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'flex';
     document.getElementById('descriptionBtn').style.display = 'flex';
     document.getElementById('gameHeadline').style.display = 'flex';
+    document.getElementById('impressumBtn').style.display = 'flex';
 }
 
 function openDescription() {
     checkScreenScale();
-    const description = document.getElementById('description');
-    const startBtn = document.getElementById('startBtn');
-    const startHeadline = document.getElementById('startHeadline');
-    const descriptionBtn = document.getElementById('descriptionBtn');
+    document.getElementById('description').style.display = 'flex';
+    document.getElementById('startBtn').style.display = 'flex';
+    document.getElementById('impressumBtn').style.display = 'none';
+    document.getElementById('startHeadline').style.display = 'none';
+    document.getElementById('descriptionBtn').style.display = 'none';
+    document.getElementById('touch-controls').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'none';
     const infoTable = document.getElementById('infoTable');
-    startBtn.style.display = 'none';
-    startHeadline.style.display = 'none';
-    descriptionBtn.style.display = 'none';
-    description.style.display = 'flex';
     infoTable.scrollTop = 0;
-    infoTable.innerHTML = `
+    infoTable.innerHTML = loadInfoTableHtml();
+}
+
+function closeDescription() {
+    document.getElementById('impressumBtn').style.display = 'flex';
+    document.getElementById('description').style.display = 'none';
+    document.getElementById('startBtn').style.display = 'flex';
+    document.getElementById('startHeadline').style.display = 'flex';
+    document.getElementById('descriptionBtn').style.display = 'flex';
+    document.getElementById('gameHeadline').style.display = 'flex';
+    document.getElementById('infoTable').innerHTML = '';
+}
+
+
+
+function endGame(output) {
+    setTimeout(() => {
+        if (output === 'lose') {
+            showGameIsLost();
+        }
+        if (output === 'win') {
+            showGameIsWon();
+        }
+        if (world && world.backgroundMusic) {
+            world.backgroundMusic.pause();
+            world.backgroundMusic.currentTime = 0;
+        }
+        if (world && world.bossMusic) {
+            world.bossMusic.pause();
+        }
+    }, 1000);
+}
+
+function showGameIsLost() {
+    document.getElementById('endScreen').style.display = 'flex';
+    document.getElementById('endScreenBtns').style.display = 'flex';
+    document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/Game Over/Recurso 9.png';
+    document.getElementById('changingBtn').onclick = startGame;
+    document.getElementById('changingBtn').innerHTML = 'Try Again';
+    intervals.forEach(id => clearInterval(id));
+    intervals = [];
+    initIntervals(world);
+    world.playSound('audio/lose.wav', 0.4);
+}
+
+function showGameIsWon() {
+    document.getElementById('endScreen').style.display = 'flex';
+    document.getElementById('endScreenBtns').style.display = 'flex';
+    document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/You win/Recurso 22.png';
+    document.getElementById('changingBtn').onclick = nextGame;
+    document.getElementById('changingBtn').innerHTML = 'Next Level';
+    intervals.forEach(id => clearInterval(id));
+    intervals = [];
+    initIntervals(world);
+    world.playSound('audio/win.wav', 0.4);
+    world.playSound('audio/cheering.wav', 0.4);
+}
+
+
+function nextGame() {
+    canvas.style.display = 'none';
+    document.getElementById('endScreen').style.display = 'none';
+    document.getElementById('touch-controls').style.display = 'none';
+    document.getElementById('excuseText').style.display = 'flex';
+    document.getElementById('backToMenu').style.display = 'flex';
+    document.getElementById('excuseText').innerHTML = 'Unfortunately, no further levels exist yet, as the game is currently in alpha. However, you can replay the same level.';
+}
+
+
+function setStoppableIntervals(fn, time) {
+    let id = setInterval(fn, time);
+    intervals.push(id);
+}
+
+
+function initIntervals(world) {
+    setStoppableIntervals(() => world.character.moveCharacter(), 1000 / 60);
+    setStoppableIntervals(() => world.character.animate(), 100);
+    if (world.level && world.level.enemies) {
+        world.level.enemies.forEach(enemy => {
+            if (typeof enemy.animate === 'function') {
+                setStoppableIntervals(() => enemy.animate(), 1000 / 6);
+            }
+        });
+    }
+    setStoppableIntervals(() => world.run(), 1000 / 60);
+}
+
+
+function playBackgroundMusic() {
+    const bgMusic = new Audio('audio/Game-music.mp3');
+    bgMusic.loop = true;
+    bgMusic.volume = 0.1;
+    if (world.isMuted) {
+        bgMusic.muted = true;
+    }
+    bgMusic.play();
+    world.backgroundMusic = bgMusic;
+    window.world = world;
+    playEndbossMusic();
+}
+
+function playEndbossMusic() {
+    const bossMusic = new Audio('audio/game-music-endboss.mp3');
+    bossMusic.loop = true;
+    bossMusic.volume = 0.5;
+    if (world.isMuted) {
+        bossMusic.muted = true;
+    }
+    world.bossMusic = bossMusic;
+    world.bossMusicStarted = false;
+}
+
+
+function playMenuSound(path, volume) {
+    let sound = new Audio(path);
+    sound.volume = volume;
+    sound.play();
+}
+
+
+function bindTouchControls() {
+    const touchControls = createTouchControls();
+    touchControls.forEach(m => {
+        const el = document.getElementById(m.id);
+        if (!el) return;
+        el.addEventListener('mousedown', m.down);
+        el.addEventListener('mouseup', m.up);
+        el.addEventListener('mouseleave', m.up);
+        el.addEventListener('touchstart', (e) => { e.preventDefault(); m.down(); }, { passive: false });
+        el.addEventListener('touchend', (e) => { e.preventDefault(); m.up(); }, { passive: false });
+    });
+}
+
+function createTouchControls() {
+    return [
+        { id: 'leftBtn', down: () => keyboard.LEFT = true, up: () => keyboard.LEFT = false },
+        { id: 'rightBtn', down: () => keyboard.RIGHT = true, up: () => keyboard.RIGHT = false },
+        { id: 'upBtn', down: () => keyboard.UP = true, up: () => keyboard.UP = false },
+        { id: 'downBtn', down: () => keyboard.DOWN = true, up: () => keyboard.DOWN = false },
+        { id: 'shootBtn', down: () => keyboard.SPACE = true, up: () => keyboard.SPACE = false },
+    ]
+}
+
+
+function loadImpressumHtml() {
+    return `
+    <h1>Impressum</h1><h3>Allgemeine Angaben</h3><p><b>Internet:</b> <a href="https://tino-wulf.developerakademie.net/Sharkie/Sharkie/index.html" target="_blank">https://tino-wulf.developerakademie.net/Sharkie/Sharkie/index.html</a></p>
+    <p><b>Name des Diensteanbieters:</b> Developer Akademie Einzelunternehmen</p>
+    <p><b>Vertreten durch:</b> Manuel Thaler, Junus Ergin </p>
+    <h3>Anschrift und Kontakt</h3><p> Tassiloplatz 25</p>
+    <p>81541 München</p>
+    <p><b>Telefon: <a href="tel:016002000730">016002000730</a></p>
+    <p><b>Email: <a href="mailto:info@developerakademie.com">info@developerakademie.com</a></p>
+    <p>Erstellt von <a href="https://impressum-generator.info/" target="_blank">impressum-generator.info</a></p>`
+}
+
+function loadInfoTableHtml() {
+    return `
         <p id="startText">
             Join Sharkie on an epic underwater adventure through vibrant coral caves and dark ocean trenches.
             Battle fierce jellyfish, sneaky pufferfish, and the mighty Endboss lurking in the deep.
@@ -154,165 +390,6 @@ function openDescription() {
             <img src="img/2.Enemy/3 Final Enemy/2.floating/5.png" alt="Endboss">
         </div>
     
-    `;
+    `
 }
 
-function closeDescription() {
-    const description = document.getElementById('description');
-    const startBtn = document.getElementById('startBtn');
-    const startHeadline = document.getElementById('startHeadline');
-    const descriptionBtn = document.getElementById('descriptionBtn');
-    const infoTable = document.getElementById('infoTable');
-    const gameHeadline = document.getElementById('gameHeadline');
-    description.style.display = 'none';
-    infoTable.innerHTML = '';
-    startBtn.style.display = 'flex';
-    startHeadline.style.display = 'flex';
-    descriptionBtn.style.display = 'flex';
-    gameHeadline.style.display = 'flex';
-}
-
-
-
-function endGame(output) {
-    setTimeout(() => {
-        if (output === 'lose') {
-            document.getElementById('endScreen').style.display = 'flex';
-            document.getElementById('endScreenBtns').style.display = 'flex';
-            document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/Game Over/Recurso 9.png';
-            document.getElementById('changingBtn').onclick = startGame;
-            document.getElementById('changingBtn').innerHTML = 'Try Again';
-            intervals.forEach(id => clearInterval(id));
-            intervals = [];
-            initIntervals(world);
-            world.playSound('audio/lose.wav', 0.4);
-        }
-
-        if (output === 'win') {
-            document.getElementById('endScreen').style.display = 'flex';
-            document.getElementById('endScreenBtns').style.display = 'flex';
-            document.getElementById('endScreenImg').src = 'img/6.Botones/Tittles/You win/Recurso 22.png';
-            document.getElementById('changingBtn').onclick = nextGame;
-            document.getElementById('changingBtn').innerHTML = 'Next Level';
-            intervals.forEach(id => clearInterval(id));
-            intervals = [];
-            initIntervals(world);
-            world.playSound('audio/win.wav', 0.4);
-            world.playSound('audio/cheering.wav', 0.4);
-        }
-
-        if (world && world.backgroundMusic) {
-            world.backgroundMusic.pause();
-            world.backgroundMusic.currentTime = 0;
-        }
-
-        if (world && world.bossMusic) {
-            world.bossMusic.pause();
-        }
-    }, 1000);
-}
-
-
-function nextGame() {
-    canvas.style.display = 'none';
-    document.getElementById('endScreen').style.display = 'none';
-    document.getElementById('excuseText').style.display = 'flex';
-    document.getElementById('backToMenu').style.display = 'flex';
-    document.getElementById('excuseText').innerHTML = 'Unfortunately, no further levels exist yet, as the game is currently in alpha. However, you can replay the same level.';
-}
-
-
-function setStoppableIntervals(fn, time) {
-    let id = setInterval(fn, time);
-    intervals.push(id);
-}
-
-
-function initIntervals(world) {
-    // Character Bewegung und Animation
-    setStoppableIntervals(() => world.character.moveCharacter(), 1000 / 60);
-    setStoppableIntervals(() => world.character.animate(), 100);
-
-    // Gegner-Animationen (z.B. Endboss, PufferFish)
-    if (world.level && world.level.enemies) {
-        world.level.enemies.forEach(enemy => {
-            if (typeof enemy.animate === 'function') {
-                setStoppableIntervals(() => enemy.animate(), 1000 / 6);
-            }
-        });
-    }
-
-    // Weitere Intervalle nach Bedarf (z.B. für World-Methoden)
-    setStoppableIntervals(() => world.run(), 1000 / 60);
-}
-
-function playBackgroundMusik() {
-    const bgMusic = new Audio('audio/Game-music.mp3');
-    bgMusic.loop = true;
-    bgMusic.volume = 0.1;
-    if (world.isMuted) {
-        bgMusic.muted = true;
-    }
-    bgMusic.play();
-    world.backgroundMusic = bgMusic;
-    window.world = world;
-    const bossMusic = new Audio('audio/game-music-endboss.mp3');
-    bossMusic.loop = true;
-    bossMusic.volume = 0.5;
-    world.bossMusic = bossMusic;
-    world.bossMusicStarted = false;
-}
-
-function playMenuSound(path, volume) {
-    let sound = new Audio(path);
-    sound.volume = volume;
-    sound.play();
-}
-
-window.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") {
-        keyboard.RIGHT = true;
-    }
-    if (e.key === "ArrowLeft") {
-        keyboard.LEFT = true;
-    }
-    if (e.key === "ArrowUp") {
-        keyboard.UP = true;
-    }
-    if (e.key === "ArrowDown") {
-        keyboard.DOWN = true;
-    }
-    if (e.key === " ") {
-        keyboard.SPACE = true;
-    }
-    if (e.key === "d") {
-        keyboard.D = true;
-    }
-    if (e.key === "w") {
-        keyboard.W = true;
-    }
-});
-
-window.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowRight") {
-        keyboard.RIGHT = false;
-    }
-    if (e.key === "ArrowLeft") {
-        keyboard.LEFT = false;
-    }
-    if (e.key === "ArrowUp") {
-        keyboard.UP = false;
-    }
-    if (e.key === "ArrowDown") {
-        keyboard.DOWN = false;
-    }
-    if (e.key === " ") {
-        keyboard.SPACE = false;
-    }
-    if (e.key === "d") {
-        keyboard.D = false;
-    }
-    if (e.key === "w") {
-        keyboard.W = false;
-    }
-});

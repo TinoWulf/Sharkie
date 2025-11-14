@@ -25,9 +25,6 @@ class StatusBar extends DrawableObject {
             'img/4. Marcadores/green/poisoned bubbles/80_ copia 2.png',
             'img/4. Marcadores/green/poisoned bubbles/100_ copia 3.png'
         ],
-        instructions: [
-            'img/6.Botones/Instructions 2.png'
-        ],
         volume: {
             up: [
                 'img/8.Volume/volume-up.png'
@@ -51,7 +48,7 @@ class StatusBar extends DrawableObject {
         this.loadImages(this.statusImages.coins);
         this.loadImages(this.statusImages.life);
         this.loadImages(this.statusImages.poison);
-        this.loadImages(this.statusImages.instructions);
+        //this.loadImages(this.statusImages.instructions);
         this.loadImages(this.statusImages.volume.up);
         this.loadImages(this.statusImages.volume.down);
         this.checkType();
@@ -62,7 +59,7 @@ class StatusBar extends DrawableObject {
             case 'life': this.setHealth(100); break;
             case 'coins': this.setCoins(0); break;
             case 'poison': this.setPoison(0); break;
-            case 'instructions': this.setInstructions(); break;
+            //case 'instructions': this.setInstructions(); break;
             case 'volume': this.setVolume(); break;
         }
     }
@@ -75,11 +72,11 @@ class StatusBar extends DrawableObject {
     }
 
 
-    setInstructions() {
+    /*setInstructions() {
         let images = this.statusImages[this.type];
         let path = images[0];
         this.img = this.imageCache[path];
-    }
+    }*/
 
     setPoison(poison) {
         this.poison = poison

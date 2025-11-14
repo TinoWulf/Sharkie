@@ -36,7 +36,7 @@ class DrawableObject {
         }
     }
 
-    drawFrame(ctx) {
+    /*drawFrame(ctx) {
         // nur wenn eine Offset-Hitbox definiert ist
         if (this.offset) {
             let box = this.getHitbox();
@@ -57,5 +57,5 @@ class DrawableObject {
             ctx.rect(box.x, box.y, box.width, box.height);
             ctx.stroke();
         }
-    }
+    }*/
 }

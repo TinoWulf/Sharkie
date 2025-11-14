@@ -66,10 +66,20 @@ h1 {
     line-height: 2;
 }
 
-#menuMuteBtn {
+#headerWrapper {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 1440px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 20px;
+    z-index: 9999;
+}
+
+#menuMuteBtn {
     background-color: #531A82;
     border: 2px solid white;
     color: white;
@@ -77,7 +87,6 @@ h1 {
     padding: 10px 15px;
     border-radius: 12px;
     cursor: pointer;
-    z-index: 9999;
 }
 
 
@@ -422,8 +431,6 @@ canvas.active {
     #menuMuteBtn {
         padding: 5px 5px;
         font-size: 16px;
-        top: 10px;
-        right: 10px;
     }
 }
 
@@ -434,6 +441,11 @@ canvas.active {
 
     #startHeadline {
         margin-bottom: 50px;
+    }
+
+    #menuMuteBtn {
+        padding: 5px 5px;
+        font-size: 16px;
     }
 }
 

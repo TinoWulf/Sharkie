@@ -12,6 +12,7 @@
     <script src="game.js"></script>
     <script src="./classes/drawable-object.class.js"></script>
     <script src="./classes/moveable-objects.class.js"></script>
+    <script src="./classes/endboss-healthbar.class.js"></script>
     <script src="./classes/character.class.js"></script>
     <script src="./classes/puffer-fish.js"></script>
     <script src="./classes/jelly-fish.class.js"></script>
@@ -30,9 +31,9 @@
     <h1 id="gameHeadline">Sharkie</h1>
     <h2 id="startHeadline"></h2>
     <p id="excuseText" style="display: none;"></p>
-    <button id="menuMuteBtn" onclick="toggleMuteFromMenu()">
-        🔊
-    </button>
+    <div id="headerWrapper">
+        <button id="menuMuteBtn" onclick="toggleMuteFromMenu()">🔊</button>
+    </div>
     <img onclick="startGame()" src="img/6.Botones/Start/1.png" alt="Start" id="startBtn">
     <div id="descriptionBtn" class="endScreenBtn" onclick="openDescription()">What is Sharkie?</div>
     <div class="endScreenBtn" id="backToMenu" onclick="backToMenu()" style="display: none;">Back to Menu</div>

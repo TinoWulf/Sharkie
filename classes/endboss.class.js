@@ -89,13 +89,15 @@ class Endboss extends MovableObject {
     hit(damage) {
         if (this.dead || this.isDying) return;
         this.health -= damage;
+        if (this.world?.endbossHealthBar)
+            this.world.endbossHealthBar.setBossHealth(this.health);
         this.lastHit = new Date().getTime();
         this.hurtTime = this.lastHit;
         this.isCurrentlyHurt = true;
         setTimeout(() => {
             this.isCurrentlyHurt = false;
         }, 900);
-    this.playIsDyingSequence();
+        this.playIsDyingSequence();
     }
 
 
@@ -108,13 +110,14 @@ class Endboss extends MovableObject {
             }, 1000);
             setTimeout(() => {
                 console.log('check');
-                
+
                 this.dead = true;
                 this.isDying = false;
                 this.isPlayingDead = false;
             }, 1500);
         }
     }
+
 
     animate() {
         if (!this.world || this.world.character.isDead()) return;

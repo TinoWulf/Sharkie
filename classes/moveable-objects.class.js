@@ -2,7 +2,7 @@ class MovableObject extends DrawableObject {
 
     otherDirection = false;
     lastHit = 0;
-    gravity = 2; // pixels per tick^2, just a start value
+    gravity = 2;
     speedY = 0;
     keyboard;
     startMovingDistance = 1000;
@@ -12,8 +12,6 @@ class MovableObject extends DrawableObject {
     health = 100;
 
     getHitbox() {
-        // Ensure offset fields exist (fallback to 0) to avoid NaN when a caller
-        // assigns a partial offset object.
         const off = Object.assign({ top: 0, bottom: 0, left: 0, right: 0 }, this.offset || {});
         return {
             x: this.x + off.left,
@@ -49,7 +47,7 @@ class MovableObject extends DrawableObject {
 
     hit(damage, hittedBy) {
         let now = new Date().getTime();
-        if (now - this.lastHit < 1200) return; // 1.2 Sek. Immunität
+        if (now - this.lastHit < 1200) return;
         this.lastHit = now;
 
         if (this instanceof Character) {
@@ -81,7 +79,7 @@ class MovableObject extends DrawableObject {
 
     isHurt() {
         let timepassed = new Date().getTime() - this.lastHit;
-        return timepassed < 1200; // 1 Sekunde "hurt"-Status
+        return timepassed < 1200;
     }
 
     isDead() {
@@ -96,18 +94,18 @@ class MovableObject extends DrawableObject {
     }
 
     moveLeft(speed) {
-        this.x -= speed; // move left by 'speed' pixels every 1/60 second
+        this.x -= speed;
     }
 
     moveRight(speed) {
         setInterval(() => {
-            this.x += speed; // move right by 'speed' pixels every 1/60 second
-        }, 1000 / 60); // 60 frames per second
+            this.x += speed;
+        }, 1000 / 60);
     }
 
     applyGravity() {
         this.y += this.speedY;
-        this.speedY += this.gravity;
+        this.speedY -= this.gravity;
     }
 
 

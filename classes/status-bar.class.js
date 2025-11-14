@@ -108,7 +108,6 @@ class StatusBar extends DrawableObject {
     }
 
     returnImageIndex(type) {
-        // Map health (0-100) to image index (0..5)
         if (!type && type !== 0) type = 100;
         if (type >= 100) return 5;
         if (type >= 80) return 4;

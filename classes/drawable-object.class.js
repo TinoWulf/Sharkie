@@ -23,9 +23,7 @@ class DrawableObject {
     }
 
     draw(ctx) {
-        // Defensive: ensure this.img is a valid HTMLImageElement (or similar) before drawing
         if (!this.img) {
-            // try to pick a cached image as a fallback
             const keys = Object.keys(this.imageCache);
             if (keys.length) {
                 this.img = this.imageCache[keys[0]];

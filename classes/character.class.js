@@ -89,6 +89,16 @@ class Character extends MovableObject {
             'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/7.png',
             'img/1.Sharkie/4.Attack/Bubble trap/op1 (with bubble formation)/8.png'
         ],
+        attackForWhale: [
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/1.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/2.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/3.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/4.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/5.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/6.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/7.png',
+            'img/1.Sharkie/4.Attack/Bubble trap/For Whale/8.png'
+        ],
         fallAsleep: [
             'img/1.Sharkie/2.Long_IDLE/i1.png',
             'img/1.Sharkie/2.Long_IDLE/I2.png',
@@ -146,6 +156,7 @@ class Character extends MovableObject {
         this.loadImages(this.imagesCharacter.dead.poisoned);
         this.loadImages(this.imagesCharacter.dead.electric);
         this.loadImages(this.imagesCharacter.attack);
+        this.loadImages(this.imagesCharacter.attackForWhale);
         this.loadImages(this.imagesCharacter.fallAsleep);
         this.loadImages(this.imagesCharacter.sleeping);
         this.lastKeyPressTime = new Date().getTime();
@@ -200,35 +211,40 @@ class Character extends MovableObject {
 
     characterAnimationWithoutAttacking() {
         if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
-                this.playAnimation(this.imagesCharacter.swimming);
-            } else if (this.isDead() && !this.deadByElectric && !this.deadByPoison) {
-                this.characterIsDeadBy();
-            } else if (this.deadByPoison) {
-                this.playAnimation(this.imagesCharacter.stillDead.poisoned);
-            } else if (this.deadByElectric) {
-                this.playAnimation(this.imagesCharacter.stillDead.electric);
-            } else if (this.isFallingAsleep && !this.isSleeping) {
-                this.characterIsSleeping();
-            } else if (this.isHurt() && this.isPoisoned) {
-                this.characterIsHurtByPoison();
-            } else if (this.isHurt() && this.isElectrified) {
-                this.characterIsHurtByElectric();
-            } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
-                this.playAnimation(this.imagesCharacter.standing);
-            }
+            this.playAnimation(this.imagesCharacter.swimming);
+        } else if (this.isDead() && !this.deadByElectric && !this.deadByPoison) {
+            this.characterIsDeadBy();
+        } else if (this.deadByPoison) {
+            this.playAnimation(this.imagesCharacter.stillDead.poisoned);
+        } else if (this.deadByElectric) {
+            this.playAnimation(this.imagesCharacter.stillDead.electric);
+        } else if (this.isFallingAsleep && !this.isSleeping) {
+            this.characterIsSleeping();
+        } else if (this.isHurt() && this.isPoisoned) {
+            this.characterIsHurtByPoison();
+        } else if (this.isHurt() && this.isElectrified) {
+            this.characterIsHurtByElectric();
+        } else if (!this.isSleeping && !this.isFallingAsleep && !this.isDead() && !this.isAttacking) {
+            this.playAnimation(this.imagesCharacter.standing);
+        }
     }
 
     characterIsAttacking() {
         this.isAttacking = true;
         this.waitingForAttack = true;
         this.currentImageIndex = 0;
-        this.playAttackAnimation();
+        const poisonFull = this.world.statusBar[2].poison >= 100;
+        if (poisonFull) {
+            this.playAttackAnimation(this.imagesCharacter.attackForWhale);
+        } else {
+            this.playAttackAnimation(this.imagesCharacter.attack);
+        }
         setTimeout(() => {
-            this.world.checkThrowableObjects();
+            this.world.checkThrowableObjects(poisonFull);
             this.world.playSound('audio/bubble-pop-06-351337.mp3', 0.4);
-
         }, 350);
     }
+
 
     characterIsDeadBy() {
         if (this.isPoisoned) {
@@ -248,26 +264,26 @@ class Character extends MovableObject {
 
     characterIsSleeping() {
         this.playAnimation(this.imagesCharacter.fallAsleep);
-                if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
-                    this.isSleeping = true;
-                    this.isFallingAsleep = false;
-                    this.currentImageIndex = 0;
-                    this.playSleepingAnimation();
-                }
+        if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
+            this.isSleeping = true;
+            this.isFallingAsleep = false;
+            this.currentImageIndex = 0;
+            this.playSleepingAnimation();
+        }
     }
 
     characterIsHurtByPoison() {
         this.playAnimation(this.imagesCharacter.hurtPoisoned);
-                setTimeout(() => {
-                    if (!this.isHurt()) this.isPoisoned = false;
-                }, 1200);
+        setTimeout(() => {
+            if (!this.isHurt()) this.isPoisoned = false;
+        }, 1200);
     }
 
     characterIsHurtByElectric() {
         this.playAnimation(this.imagesCharacter.hurtElectric);
-                setTimeout(() => {
-                    if (!this.isHurt()) this.isElectrified = false;
-                }, 1200);
+        setTimeout(() => {
+            if (!this.isHurt()) this.isElectrified = false;
+        }, 1200);
     }
 
     playSleepingAnimation() {
@@ -286,8 +302,8 @@ class Character extends MovableObject {
         }, 1000 / 5);
     }
 
-    playAttackAnimation() {
-        const frames = this.imagesCharacter.attack;
+    playAttackAnimation(frames) {
+        frames = frames || this.imagesCharacter.attack;
         let i = 0;
         const attackInterval = setInterval(() => {
             this.loadImage(frames[i]);

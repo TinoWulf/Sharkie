@@ -44,18 +44,16 @@ class PufferFish extends MovableObject {
 
     constructor(x) {
         super().loadImage('img/2.Enemy/1.Puffer fish (3 color options)/1.Swim/1.swim1.png');
-        // Animation and movement intervals are started from World after e.world is set
-        this.speed = 0.5 + Math.random() * 1;  //random speed between 0.5 and 1.5
+        this.speed = 0.5 + Math.random() * 1;
         this.loadImages(this.imagesPufferFish.swimming);
         this.loadImages(this.imagesPufferFish.dead);
         this.loadImages(this.imagesPufferFish.blowing);
         this.loadImages(this.imagesPufferFish.swimmingBlowed);
-        this.x = x + Math.random() * 500; // random x position between 600 and 1100
-        this.y = 400 - Math.random() * 400; // fixed y position
+        this.x = x + Math.random() * 500;
+        this.y = 400 - Math.random() * 400;
     }
 
     startMoving() {
-        // Guard: only access world when it's set
         if (this.world.character.x + this.startMovingDistance > this.x && !this.startedMoving) {
             setStoppableIntervals(() => this.moveLeft(this.speed), 1000 / 60);
             this.startedMoving = true;

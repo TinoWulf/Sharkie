@@ -6,7 +6,6 @@ let globalMuted = false;
 
 function init() {
     document.getElementById('startHeadline').innerHTML = 'Dive into the Depths with Sharkie! 🦈';
-    canvas.style.display = 'none';
 }
 
 
@@ -70,6 +69,15 @@ window.addEventListener("keyup", (e) => {
     if (e.key === "w") {
         keyboard.W = false;
     }
+});
+
+const storedMute = localStorage.getItem('globalMuted');
+if (storedMute !== null) {
+    globalMuted = storedMute === 'true';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("menuMuteBtn").innerHTML = globalMuted ? "🔇" : "🔊";
 });
 
 
@@ -137,15 +145,19 @@ function hideMenuElements() {
 
 
 function checkScreenScale() {
-    if (window.matchMedia("(max-height: 480px)").matches) {
+    if (window.matchMedia("(max-width: 768px)").matches || window.matchMedia("(max-height: 480px)").matches) {
         document.getElementById('gameHeadline').style.display = 'none';
         document.getElementById('touch-controls').style.display = 'flex';
+        bindTouchControls();
+    } else {
+        document.getElementById('touch-controls').style.display = 'none';
     }
 }
 
 
 function backToMenu() {
     init();
+    canvas.style.display = 'none';
     canvas.classList.remove('active');
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
@@ -301,11 +313,8 @@ function playMenuSound(path, volume) {
 
 function toggleMuteFromMenu() {
     globalMuted = !globalMuted;
-
-    // Button-Icon aktualisieren
+    localStorage.setItem('globalMuted', globalMuted);
     document.getElementById("menuMuteBtn").innerHTML = globalMuted ? "🔇" : "🔊";
-
-    // Wenn Spiel läuft → direkt an world weitergeben
     if (window.world) {
         world.isMuted = globalMuted;
         syncWorldAudio();
@@ -316,13 +325,9 @@ function toggleMuteFromMenu() {
 
 function syncWorldAudio() {
     if (!world) return;
-
     const mute = world.isMuted;
-
     if (world.backgroundMusic) world.backgroundMusic.muted = mute;
     if (world.bossMusic) world.bossMusic.muted = mute;
-
-    // Alle weiteren Soundeffekte muten
     document.querySelectorAll("audio").forEach(a => a.muted = mute);
 }
 
@@ -393,6 +398,31 @@ function loadInfoTableHtml() {
             <img src="img/6.Botones/Key/Space Bar key.png" alt="Sharkie Attack">
         </div>
 
+        <h2>Items Overview</h2>
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Coin</h3>
+                <p>Collect coins to buy advantages for the next level after the game.</p>
+            </div>
+            <img src="img/4. Marcadores/green/100_ copia 6.png" alt="Coin">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Health</h3>
+                <p>Collect health to restore Sharkie's vitality and survive longer in the ocean.</p>
+            </div>
+            <img src="img/4. Marcadores/green/100_  copia 3.png" alt="Coin">
+        </div>
+
+        <div class="info-row">
+            <div class="info-text">
+                <h3>Poison</h3>
+                <p>It's important to collect poison, because in the end it grants you a damage advantage.</p>
+            </div>
+            <img src="img/4. Marcadores/green/100_ copia 5.png" alt="Coin">
+        </div>
+
         <h2>Enemies Overview</h2>
 
         <div class="info-row">
@@ -435,7 +465,7 @@ function loadInfoTableHtml() {
                 <h3>Endboss</h3>
                 <p>The mighty ruler of the deep sea. Beware its massive size and deadly attacks!</p>
             </div>
-            <img src="img/2.Enemy/3 Final Enemy/2.floating/5.png" alt="Endboss">
+            <img src="img/2.Enemy/3 Final Enemy/2.Floating/5.png" alt="Endboss">
         </div>
     
     `

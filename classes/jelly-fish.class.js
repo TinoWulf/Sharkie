@@ -46,6 +46,7 @@ class JellyFish extends MovableObject {
         
     };
 
+    
     colorStats = {
         lila: {
             speedRange: [0.5, 1.0],
@@ -64,11 +65,13 @@ class JellyFish extends MovableObject {
         }
     };
 
+
     height = 50;
     width = 50;
     dead = false;
     currentImageIndex = 0;
     offset = { top: 10, bottom: 15, left: 8, right: 10 };
+
 
     constructor(x, color) {
         super();
@@ -85,6 +88,7 @@ class JellyFish extends MovableObject {
         this.y = 400 - Math.random() * 400;
     }
 
+
     animate() {
         if (!this.dead) {
             this.playAnimation(this.imagesJellyFish[this.color].swimming);
@@ -94,14 +98,12 @@ class JellyFish extends MovableObject {
         
     }
 
+
     startMoving() {
         if (this.dead) return;
         this.moveLeft(this.speed);
-
-        // 2️⃣ vertikale Bewegung (sanftes Schweben)
         if (!this.baseY) this.baseY = this.y;
         if (!this.frame) this.frame = 0;
-
         this.frame += 0.05 * this.speed;
         this.y = this.baseY + Math.sin(this.frame) * 50;
     }

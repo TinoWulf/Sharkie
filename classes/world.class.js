@@ -22,6 +22,15 @@ class World {
         new Collectable(7400, 400, 'life'),
         new Collectable(8000, 400, 'life'),
         new Collectable(9000, 400, 'life'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
+        new Collectable(400, 400, 'poison'),
         new Collectable(1900, 400, 'poison'),
         new Collectable(2300, 400, 'poison'),
         new Collectable(3150, 400, 'poison'),
@@ -41,6 +50,10 @@ class World {
         this.checkCollisions();
         this.character.world = this;
         this.level.enemies.forEach(e => e.world = this);
+        const boss = this.level.enemies.find(e => e instanceof Endboss);
+        if (boss) {
+            this.endbossHealthBar = new EndbossHealthBar(boss);
+        }
         setStoppableIntervals(() => this.character.moveCharacter(), 1000 / 60);
         setStoppableIntervals(() => this.character.animate(), 100);
         setStoppableIntervals(() => this.run(), 1000 / 60);
@@ -91,12 +104,11 @@ class World {
         });
     }
 
-    checkThrowableObjects() {
+    checkThrowableObjects(poisoned = false) {
         let hb = this.character.getHitbox();
         let x = hb.x + (this.character.otherDirection ? 0 : hb.width - 10);
         let y = hb.y + hb.height / 2 - (this.character.otherDirection ? 0 : 12);
-        const t = new Throwable(x, y);
-        t.otherDirection = this.character.otherDirection;
+        const t = new Throwable(x, y, this.character.otherDirection, poisoned);
         this.throwableObject.push(t);
     }
 
@@ -177,7 +189,8 @@ class World {
 
     processThrowableHit(throwable, enemy, i, j) {
         if (enemy instanceof Endboss && throwable.isCollidingWithBox(enemy.getBubbleHitbox())) {
-            enemy.hit(20, 'bubble');
+            const damage = throwable.getDamage();
+            enemy.hit(damage, 'bubble');
             this.removeThrowable(i);
             this.playSound('audio/endboss hurt.mp3', 0.4);
             return true;
@@ -232,7 +245,7 @@ class World {
         c.collected = true;
     }
 
-    // --- Drawing & Helpers ---
+
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.translate(this.camera_x, 0);
@@ -242,6 +255,10 @@ class World {
         this.ctx.translate(this.camera_x, 0);
         this.drawObject(this.character);
         this.drawMultipleObjects(this.level.enemies);
+        if (this.endbossHealthBar && !this.endbossHealthBar.boss.dead) {
+            this.endbossHealthBar.updatePosition();
+            this.drawObject(this.endbossHealthBar);
+        }
         this.drawMultipleObjects(this.throwableObject);
         this.drawMultipleObjects(this.collectableObjects);
         this.ctx.translate(-this.camera_x, 0);
@@ -288,6 +305,7 @@ class World {
 
     toggleVolume() {
         this.isMuted = !this.isMuted;
+        localStorage.setItem('globalMuted', this.isMuted);
         const v = this.statusBar.find(s => s.type === 'volume');
         const imgPath = this.isMuted ? v.statusImages.volume.down[0]
             : v.statusImages.volume.up[0];

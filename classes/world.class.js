@@ -47,6 +47,7 @@ class World {
         setStoppableIntervals(() => this.level.spawnEnemies(this.character), 2000);
         this.collectableObjects.push(...Collectable.spawnBatch(15, 'coin'));
         bindTouchControls();
+        this.isMuted = globalMuted;
     }
 
     setWorld() {
@@ -286,7 +287,6 @@ class World {
     }
 
     toggleVolume() {
-        this.playSound('audio/volume-up.wav', 0.5);
         this.isMuted = !this.isMuted;
         const v = this.statusBar.find(s => s.type === 'volume');
         const imgPath = this.isMuted ? v.statusImages.volume.down[0]
@@ -294,7 +294,8 @@ class World {
         v.img = v.imageCache[imgPath];
         if (window.world?.backgroundMusic) window.world.backgroundMusic.muted = this.isMuted;
         if (window.world?.bossMusic) window.world.bossMusic.muted = this.isMuted;
-        this.playSound('audio/volume-up.wav', 0.5);
+        globalMuted = this.isMuted;
+        document.getElementById("menuMuteBtn").innerHTML = this.isMuted ? "🔇" : "🔊";
     }
 
     playSound(path, vol) {

@@ -66,10 +66,18 @@ class StatusBar extends DrawableObject {
 
 
     setVolume() {
-        let images = this.statusImages[this.type].up;
+        let images = globalMuted
+            ? this.statusImages[this.type].down
+            : this.statusImages[this.type].up;
+
         let path = images[0];
         this.img = this.imageCache[path];
     }
+
+    setMuted(isMuted) {
+        this.percentage = isMuted ? 0 : 100;
+    }
+
 
 
     /*setInstructions() {

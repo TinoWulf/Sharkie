@@ -2,10 +2,11 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 let intervals = [];
-
+let globalMuted = false;
 
 function init() {
     document.getElementById('startHeadline').innerHTML = 'Dive into the Depths with Sharkie! 🦈';
+    canvas.style.display = 'none';
 }
 
 
@@ -83,6 +84,7 @@ function loadImpressum() {
     impressumDiv.innerHTML = loadImpressumHtml();
 }
 
+
 function showImpressum(impressumBtn, impressumDiv) {
     document.getElementById('startBtn').style.display = 'none';
     document.getElementById('descriptionBtn').style.display = 'none';
@@ -92,6 +94,7 @@ function showImpressum(impressumBtn, impressumDiv) {
     impressumBtn.innerText = 'Close Impressum';
 }
 
+
 function hideImpressum(impressumBtn, impressumDiv) {
     impressumDiv.style.display = 'none';
     impressumBtn.innerText = 'Impressum';
@@ -100,6 +103,7 @@ function hideImpressum(impressumBtn, impressumDiv) {
     document.getElementById('startHeadline').style.display = 'flex';
     document.getElementById('gameHeadline').style.display = 'flex';
 }
+
 
 function startGame() {
     checkScreenScale();
@@ -114,8 +118,12 @@ function startGame() {
     canvas.classList.add('active');
     hideMenuElements();
     world = new World(canvas, keyboard);
+    world.isMuted = globalMuted;
+    syncWorldAudio();
+    world.statusBar.find(s => s.type === "volume").setMuted(globalMuted);
     playBackgroundMusic();
 }
+
 
 function hideMenuElements() {
     document.getElementById('startBtn').style.display = 'none';
@@ -124,7 +132,9 @@ function hideMenuElements() {
     document.getElementById('endScreenBtns').style.display = 'none';
     document.getElementById('descriptionBtn').style.display = 'none';
     document.getElementById('impressumBtn').style.display = 'none';
+    document.getElementById('menuMuteBtn').style.display = 'none';
 }
+
 
 function checkScreenScale() {
     if (window.matchMedia("(max-height: 480px)").matches) {
@@ -136,7 +146,6 @@ function checkScreenScale() {
 
 function backToMenu() {
     init();
-    canvas.style.display = 'none';
     canvas.classList.remove('active');
     document.getElementById('endScreen').style.display = 'none';
     document.getElementById('endScreenBtns').style.display = 'none';
@@ -148,7 +157,10 @@ function backToMenu() {
     document.getElementById('descriptionBtn').style.display = 'flex';
     document.getElementById('gameHeadline').style.display = 'flex';
     document.getElementById('impressumBtn').style.display = 'flex';
+    document.getElementById('menuMuteBtn').style.display = 'flex';
+    document.getElementById('menuMuteBtn').innerHTML = globalMuted ? "🔇" : "🔊";
 }
+
 
 function openDescription() {
     checkScreenScale();
@@ -164,6 +176,7 @@ function openDescription() {
     infoTable.innerHTML = loadInfoTableHtml();
 }
 
+
 function closeDescription() {
     document.getElementById('impressumBtn').style.display = 'flex';
     document.getElementById('description').style.display = 'none';
@@ -173,7 +186,6 @@ function closeDescription() {
     document.getElementById('gameHeadline').style.display = 'flex';
     document.getElementById('infoTable').innerHTML = '';
 }
-
 
 
 function endGame(output) {
@@ -194,6 +206,7 @@ function endGame(output) {
     }, 1000);
 }
 
+
 function showGameIsLost() {
     document.getElementById('endScreen').style.display = 'flex';
     document.getElementById('endScreenBtns').style.display = 'flex';
@@ -205,6 +218,7 @@ function showGameIsLost() {
     initIntervals(world);
     world.playSound('audio/lose.wav', 0.4);
 }
+
 
 function showGameIsWon() {
     document.getElementById('endScreen').style.display = 'flex';
@@ -263,6 +277,7 @@ function playBackgroundMusic() {
     playEndbossMusic();
 }
 
+
 function playEndbossMusic() {
     const bossMusic = new Audio('audio/game-music-endboss.mp3');
     bossMusic.loop = true;
@@ -276,10 +291,41 @@ function playEndbossMusic() {
 
 
 function playMenuSound(path, volume) {
+    if (globalMuted) return;
     let sound = new Audio(path);
     sound.volume = volume;
+    sound.muted = globalMuted;
     sound.play();
 }
+
+
+function toggleMuteFromMenu() {
+    globalMuted = !globalMuted;
+
+    // Button-Icon aktualisieren
+    document.getElementById("menuMuteBtn").innerHTML = globalMuted ? "🔇" : "🔊";
+
+    // Wenn Spiel läuft → direkt an world weitergeben
+    if (window.world) {
+        world.isMuted = globalMuted;
+        syncWorldAudio();
+        world.statusBar.find(s => s.type === "volume").setMuted(globalMuted);
+    }
+}
+
+
+function syncWorldAudio() {
+    if (!world) return;
+
+    const mute = world.isMuted;
+
+    if (world.backgroundMusic) world.backgroundMusic.muted = mute;
+    if (world.bossMusic) world.bossMusic.muted = mute;
+
+    // Alle weiteren Soundeffekte muten
+    document.querySelectorAll("audio").forEach(a => a.muted = mute);
+}
+
 
 
 function bindTouchControls() {
@@ -294,6 +340,7 @@ function bindTouchControls() {
         el.addEventListener('touchend', (e) => { e.preventDefault(); m.up(); }, { passive: false });
     });
 }
+
 
 function createTouchControls() {
     return [
@@ -317,6 +364,7 @@ function loadImpressumHtml() {
     <p><b>Email: <a href="mailto:info@developerakademie.com">info@developerakademie.com</a></p>
     <p>Erstellt von <a href="https://impressum-generator.info/" target="_blank">impressum-generator.info</a></p>`
 }
+
 
 function loadInfoTableHtml() {
     return `

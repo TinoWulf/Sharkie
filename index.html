@@ -30,6 +30,9 @@
     <h1 id="gameHeadline">Sharkie</h1>
     <h2 id="startHeadline"></h2>
     <p id="excuseText" style="display: none;"></p>
+    <button id="menuMuteBtn" onclick="toggleMuteFromMenu()">
+        🔊
+    </button>
     <img onclick="startGame()" src="img/6.Botones/Start/1.png" alt="Start" id="startBtn">
     <div id="descriptionBtn" class="endScreenBtn" onclick="openDescription()">What is Sharkie?</div>
     <div class="endScreenBtn" id="backToMenu" onclick="backToMenu()" style="display: none;">Back to Menu</div>
@@ -57,8 +60,8 @@
             <button class="movingBtn" id="shootBtn">ATTACK</button>
         </div>
     </div>
-        <button id="impressumBtn" onclick="loadImpressum()">Impressum</button>
-        <div id="impressum" style="display: none;"></div>
+    <button id="impressumBtn" onclick="loadImpressum()">Impressum</button>
+    <div id="impressum" style="display: none;"></div>
 </body>
 
 </html>

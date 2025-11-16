@@ -4,6 +4,7 @@ let keyboard = new Keyboard();
 let intervals = [];
 let globalMuted = false;
 
+
 function init() {
     document.getElementById('startHeadline').innerHTML = 'Dive into the Depths with Sharkie! 🦈';
 }
@@ -71,14 +72,39 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
+
 const storedMute = localStorage.getItem('globalMuted');
 if (storedMute !== null) {
     globalMuted = storedMute === 'true';
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("menuMuteBtn").innerHTML = globalMuted ? "🔇" : "🔊";
 });
+
+
+window.addEventListener("orientationchange", checkOrientation);
+window.addEventListener("resize", checkOrientation);
+
+
+function checkOrientation() {
+    const rotateOverlay = document.getElementById("rotateDevice"); // Overlay element
+    if (window.matchMedia("(max-width: 768px)").matches || window.matchMedia("(max-height: 480px)").matches) { // Only for small screens
+        if (window.innerHeight > window.innerWidth) { // Portrait mode
+            rotateOverlay.style.display = "flex"; // Show overlay
+            if (canvas) canvas.style.display = "none"; // Hide canvas
+            document.getElementById('touch-controls').style.display = 'none'; // Hide touch controls
+        } else {
+            rotateOverlay.style.display = "none";
+            if (canvas) canvas.style.display = "flex";
+            if (world) document.getElementById('touch-controls').style.display = 'flex';
+        }
+    }
+}
+
+
+window.addEventListener('load', checkOrientation);
 
 
 function loadImpressum() {

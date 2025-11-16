@@ -166,7 +166,7 @@ class Character extends MovableObject {
         let kb = this.world.keyboard;
         this.isMoving(kb);
         this.isNotMoving(kb);
-        this.world.camera_x = -this.x + 100; // camera follows character
+        this.world.camera_x = -this.x + 100; // camera follows character 
     }
 
     isMoving(kb) {
@@ -179,10 +179,10 @@ class Character extends MovableObject {
             this.otherDirection = true;
         }
         if (kb.UP && this.y > -100 && !this.isDead()) {
-            this.y -= 2;
+            this.y -= 3;
         }
         if (kb.DOWN && this.y < this.world.canvas.height - this.height + 50 && !this.isDead()) {
-            this.y += 2;
+            this.y += 3;
         }
     }
 
@@ -306,16 +306,15 @@ class Character extends MovableObject {
         frames = frames || this.imagesCharacter.attack;
         let i = 0;
         const attackInterval = setInterval(() => {
-            this.loadImage(frames[i]);
+            this.img = this.imageCache[frames[i]];
             i++;
             if (i >= frames.length) {
                 clearInterval(attackInterval);
                 this.isAttacking = false;
                 this.currentImageIndex = 0;
-                setTimeout(() => {
-                    this.waitingForAttack = false;
-                }, 1000);
+                setTimeout(() => this.waitingForAttack = false, 1000);
             }
         }, 50);
     }
+
 }

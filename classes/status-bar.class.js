@@ -1,5 +1,16 @@
+/**
+ * StatusBar
+ *
+ * UI element that displays and updates game status: health, coins collected,
+ * poison ammo, and volume control. Each status bar shows a visual representation
+ * (sprite image) that updates based on the current value.
+ *
+ * Inherits from DrawableObject for rendering to canvas.
+ *
+ * @extends DrawableObject
+ */
 class StatusBar extends DrawableObject {
-
+    /** All status bar sprites organized by type and value percentage */
     statusImages = {
         coins: [
             'img/4. Marcadores/green/Coin/0_  copia 4.png',
@@ -36,8 +47,20 @@ class StatusBar extends DrawableObject {
     }
 
 
-    type; // 'life', 'coins', 'poison', 'instructions'
+    /** Bar type: 'life', 'coins', 'poison', or 'volume' */
+    type;
 
+    /**
+     * Create a status bar UI element for the given type.
+     * Loads all sprite variants (0-100% states) and initializes
+     * the appropriate display image for the bar type.
+     *
+     * @param {string} type - status type: 'life', 'coins', 'poison', 'volume'
+     * @param {number} x - canvas X position
+     * @param {number} y - canvas Y position
+     * @param {number} height - bar height in pixels
+     * @param {number} width - bar width in pixels
+     */
     constructor(type, x, y, height, width) {
         super();
         this.x = x;
@@ -54,6 +77,10 @@ class StatusBar extends DrawableObject {
         this.checkType();
     }
 
+    /**
+     * Initialize the status bar based on its type.
+     * Sets the initial display image and any default values.
+     */
     checkType() {
         switch (this.type) {
             case 'life': this.setHealth(100); break;
@@ -65,6 +92,10 @@ class StatusBar extends DrawableObject {
     }
 
 
+    /**
+     * Set the volume button image based on global mute state.
+     * Shows muted icon if muted, unmuted icon otherwise.
+     */
     setVolume() {
         let images = globalMuted
             ? this.statusImages[this.type].down
@@ -74,6 +105,11 @@ class StatusBar extends DrawableObject {
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Update mute state and refresh the volume icon display.
+     *
+     * @param {boolean} isMuted - whether audio is muted
+     */
     setMuted(isMuted) {
         this.percentage = isMuted ? 0 : 100;
     }
@@ -86,6 +122,11 @@ class StatusBar extends DrawableObject {
         this.img = this.imageCache[path];
     }*/
 
+    /**
+     * Update poison ammo count and display the corresponding bar image.
+     *
+     * @param {number} poison - current poison ammo count (0-100)
+     */
     setPoison(poison) {
         this.poison = poison
         let images = this.statusImages[this.type];
@@ -93,6 +134,11 @@ class StatusBar extends DrawableObject {
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Update coin count and display the corresponding bar image.
+     *
+     * @param {number} coins - current coin count (0-100)
+     */
     setCoins(coins) {
         this.coins = coins
         let images = this.statusImages[this.type];
@@ -100,6 +146,11 @@ class StatusBar extends DrawableObject {
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Update health points and display the corresponding bar image.
+     *
+     * @param {number} health - current health (0-100)
+     */
     setHealth(health) {
         this.health = health
         let images = this.statusImages[this.type];
@@ -107,6 +158,14 @@ class StatusBar extends DrawableObject {
         this.img = this.imageCache[path];
     }
 
+    /**
+     * Map a numeric value (0-100) to the appropriate sprite index.
+     * Returns an index into the statusImages array that represents
+     * the visual fill level of the status bar.
+     *
+     * @param {number} type - value to map (0-100)
+     * @returns {number} sprite index (0-5)
+     */
     returnImageIndex(type) {
         if (!type && type !== 0) type = 100;
         if (type >= 100) return 5;

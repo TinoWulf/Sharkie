@@ -1,3 +1,19 @@
+/**
+ * Endboss
+ *
+ * The final boss enemy. Controls introduction animation, floating behavior,
+ * attack animation, hurt/dying sequencing and specialized hitboxes.
+ *
+ * Key responsibilities:
+ * - Load and manage endboss animation frames for multiple states
+ * - Move towards the player smoothly (horizontal + vertical)
+ * - Provide two distinct hitboxes:
+ *   - attack hitbox (what damages the player)
+ *   - bubble hitbox (vulnerable region for player projectiles)
+ * - Play introduction and hurt/death sequences and trigger boss sounds
+ *
+ * @extends MovableObject
+ */
 class Endboss extends MovableObject {
 
     imagesEndboss = {
@@ -86,6 +102,13 @@ class Endboss extends MovableObject {
         this.img = this.imageCache[this.imagesEndboss.introduce[0]];
     }
 
+    /**
+     * Apply damage to the Endboss. Updates the health bar (if available),
+     * sets temporary hurt state and triggers dying sequence when health falls
+     * below or equal to zero.
+     *
+     * @param {number} damage - amount of health to subtract
+     */
     hit(damage) {
         if (this.dead || this.isDying) return;
         this.health -= damage;
@@ -101,6 +124,10 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Trigger the dying sequence when health reaches zero. Sets flags so the
+     * animation and removal logic can show death frames and stop behavior.
+     */
     playIsDyingSequence() {
         if (this.health <= 0 && !this.isDying) {
             this.health = 0;
@@ -109,8 +136,6 @@ class Endboss extends MovableObject {
                 this.isPlayingDead = true;
             }, 1000);
             setTimeout(() => {
-                console.log('check');
-
                 this.dead = true;
                 this.isDying = false;
                 this.isPlayingDead = false;
@@ -119,6 +144,12 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Main animation and behavior dispatcher for the Endboss. Evaluates
+     * priority states (dead, dying, hurt, attacking, introduction) and when
+     * fully introduced, plays floating animation and moves towards the
+     * character.
+     */
     animate() {
         if (!this.world || this.world.character.isDead()) return;
         if (this.dead) { this.playAnimation(this.imagesEndboss.stillDead); return }
@@ -133,6 +164,10 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Choose the appropriate dying/hurt animation depending on whether the
+     * final death animation phase is playing.
+     */
     playIsDyingAnimation() {
         if (this.isPlayingDead) {
             this.playAnimation(this.imagesEndboss.dead);
@@ -142,6 +177,11 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Play the introduction animation and sounds. When the introduction
+     * animation completes, mark the boss as introduced so normal behavior
+     * begins.
+     */
     playEndbossIntroducing() {
         this.playAnimation(this.imagesEndboss.introduce);
         this.playEndbossSounds();
@@ -152,6 +192,10 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Adjust speed and move horizontally/vertically towards the character.
+     * Speed oscillates between `minSpeed` and `maxSpeed`.
+     */
     moveTowardsCharacter() {
         const character = this.world.character;
         this.speed += 0.02 * this.speedDirection;
@@ -163,6 +207,11 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Vertical tracking: move up or down to match the character's vertical
+     * position smoothly.
+     * @param {Character} character
+     */
     moveVertical(character) {
         if (character.y + character.height / 2 < this.y + this.height / 2) {
             this.y -= this.speed / 2;
@@ -172,6 +221,11 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Horizontal tracking: move left or right toward the character and set
+     * `otherDirection` to control sprite flipping.
+     * @param {Character} character
+     */
     moveHorizontal(character) {
         if (character.x < this.x) {
             this.otherDirection = false;
@@ -183,6 +237,10 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Return the attack hitbox (area that harms the player).
+     * @returns {{x:number,y:number,width:number,height:number}}
+     */
     getAttackHitbox() {
         return {
             x: this.x + this.attackOffset.left,
@@ -193,6 +251,10 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Return the vulnerable bubble hitbox (area where projectiles can hit the boss).
+     * @returns {{x:number,y:number,width:number,height:number}}
+     */
     getBubbleHitbox() {
         return {
             x: this.x + this.bubbleOffset.left,
@@ -203,6 +265,9 @@ class Endboss extends MovableObject {
     }
 
 
+    /**
+     * Play the endboss introduction sounds once.
+     */
     playEndbossSounds() {
         if (!this.endbossIntroducingSound) {
             this.world.playSound('audio/introducing endboss.mp3', 0.4);

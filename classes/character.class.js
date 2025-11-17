@@ -1,3 +1,18 @@
+/**
+ * Character (Sharkie)
+ *
+ * The player-controlled character. Inherits from `MovableObject` and
+ * encapsulates input handling, movement, animation state machine, attack
+ * mechanics and sleep/hurt/death state transitions.
+ *
+ * Responsibilities:
+ * - Load and manage animation frames for all character states
+ * - Interpret keyboard/touch input into movement and attacks
+ * - Spawn projectiles (throwables) when attacking
+ * - Manage temporary states: hurt, attack cooldown, sleeping, death
+ *
+ * @extends MovableObject
+ */
 class Character extends MovableObject {
 
     imagesCharacter = {
@@ -124,29 +139,50 @@ class Character extends MovableObject {
 
     }
 
+    /** Hitbox offset: tight collision box inside sprite */
     offset = {
         top: 140,
         bottom: 70,
         left: 40,
         right: 40
     }
+
+    /** Timestamp of last key press (ms) used for sleep detection */
     lastKeyPressTime = 0;
+
+    /** Interval ID for sleeping animation loop (if active) */
     sleepInterval = null;
+
+    /** Current animation frame index (used across animations) */
     currentImageIndex = 0;
+
+    /** Visual size of character sprite */
     height = 250;
     width = 180;
+
+    /** World reference is set by World.setWorld() */
     x = 100;
     y = 100;
     health = 100;
     world;
+
+    /** Death-type flags to determine which "still dead" frame to show */
     deadByElectric = false;
     deadByPoison = false;
+
+    /** Attack and animation state flags */
     isAttacking = false;
     waitingForAttack = false;
+
+    /** Sleep state flags (idle detection) */
     isSleeping = false;
     isFallingAsleep = false;
 
 
+    /**
+     * Create the player character and preload all animation frames.
+     * The constructor only loads sprite frames and initializes the idle timestamp.
+     */
     constructor() {
         super().loadImage('img/1.Sharkie/1.IDLE/1.png');
         this.loadImages(this.imagesCharacter.standing);
@@ -159,9 +195,15 @@ class Character extends MovableObject {
         this.loadImages(this.imagesCharacter.attackForWhale);
         this.loadImages(this.imagesCharacter.fallAsleep);
         this.loadImages(this.imagesCharacter.sleeping);
+        // Initialize last keypress time to avoid immediate sleep
         this.lastKeyPressTime = new Date().getTime();
     }
 
+    /**
+     * Update character position based on current keyboard state and
+     * update the camera to follow the character.
+     * This is called frequently by the world's movement interval.
+     */
     moveCharacter() {
         let kb = this.world.keyboard;
         this.isMoving(kb);
@@ -169,6 +211,12 @@ class Character extends MovableObject {
         this.world.camera_x = -this.x + 100; // camera follows character 
     }
 
+    /**
+     * Apply movement input based on keyboard state.
+     * - RIGHT/LEFT update X position and facing
+     * - UP/DOWN update Y position within bounds
+     * @param {Keyboard} kb - keyboard state object
+     */
     isMoving(kb) {
         if (kb.RIGHT && this.x < this.world.level.levelEndX && !this.isDead()) {
             this.x += 3;
@@ -186,6 +234,12 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Handle idle behaviour detection. If no movement keys are pressed for
+     * a configured timeout (10s), the character will initiate falling asleep.
+     * Any input resets the timer and sleep flags.
+     * @param {Keyboard} kb - keyboard state object
+     */
     isNotMoving(kb) {
         if (!kb.RIGHT && !kb.LEFT && !kb.UP && !kb.DOWN && !this.isDead() && !this.isAttacking && !this.isHurt()) {
             let currentTime = new Date().getTime();
@@ -200,6 +254,11 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Main animation dispatcher. Decides whether to start an attack
+     * sequence or to run the non-attacking animation logic.
+     * Called regularly by the world's animation interval.
+     */
     animate() {
         if (this.world.keyboard.SPACE && !this.isHurt() && !this.isDead() && !this.isAttacking && !this.waitingForAttack) {
             this.characterIsAttacking();
@@ -209,6 +268,11 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Animation logic used when the character is not performing an attack.
+     * Checks animation states (movement, hurt, death, sleep) in priority order
+     * and selects the appropriate animation frames.
+     */
     characterAnimationWithoutAttacking() {
         if ((this.world.keyboard.RIGHT || this.world.keyboard.LEFT || this.world.keyboard.UP || this.world.keyboard.DOWN) && !this.isHurt() && !this.isDead()) {
             this.playAnimation(this.imagesCharacter.swimming);
@@ -229,6 +293,11 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Begin an attack sequence: set attack flags, play the appropriate
+     * attack animation (normal or powered by poison) and spawn a throwable
+     * after the animation delay.
+     */
     characterIsAttacking() {
         this.isAttacking = true;
         this.waitingForAttack = true;
@@ -246,6 +315,11 @@ class Character extends MovableObject {
     }
 
 
+    /**
+     * Play the appropriate death animation depending on the cause (poison or
+     * electric). When the animation finished, mark the character with the
+     * corresponding `deadBy...` flag so the correct still frame is shown.
+     */
     characterIsDeadBy() {
         if (this.isPoisoned) {
             this.playAnimation(this.imagesCharacter.dead.poisoned);
@@ -262,6 +336,10 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Play the falling-asleep animation. Once complete, switch into the
+     * persistent sleeping state and start the sleeping animation loop.
+     */
     characterIsSleeping() {
         this.playAnimation(this.imagesCharacter.fallAsleep);
         if (this.currentImageIndex % this.imagesCharacter.fallAsleep.length === this.imagesCharacter.fallAsleep.length - 1) {
@@ -272,6 +350,10 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Play poison-hurt animation and clear the poisoned flag after the hurt
+     * immunity window if the character is no longer in hurt state.
+     */
     characterIsHurtByPoison() {
         this.playAnimation(this.imagesCharacter.hurtPoisoned);
         setTimeout(() => {
@@ -279,6 +361,10 @@ class Character extends MovableObject {
         }, 1200);
     }
 
+    /**
+     * Play electric-hurt animation and clear the electrified flag after the
+     * hurt immunity window if appropriate.
+     */
     characterIsHurtByElectric() {
         this.playAnimation(this.imagesCharacter.hurtElectric);
         setTimeout(() => {
@@ -286,6 +372,10 @@ class Character extends MovableObject {
         }, 1200);
     }
 
+    /**
+     * Start or continue a repeating sleeping animation while `isSleeping` is true.
+     * Ensures previous sleep interval is cleared before creating a new one.
+     */
     playSleepingAnimation() {
         if (this.sleepInterval) {
             clearInterval(this.sleepInterval);
@@ -302,6 +392,13 @@ class Character extends MovableObject {
         }, 1000 / 5);
     }
 
+    /**
+     * Play an attack animation sequence (frames array). This uses a temporary
+     * interval to step through provided frames; on completion it resets attack
+     * flags and starts the attack cooldown (`waitingForAttack`).
+     *
+     * @param {string[]} [frames] - Optional array of image paths to use for attack
+     */
     playAttackAnimation(frames) {
         frames = frames || this.imagesCharacter.attack;
         let i = 0;

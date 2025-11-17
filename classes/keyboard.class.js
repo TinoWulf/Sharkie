@@ -1,4 +1,4 @@
-class Keyboard {
+class Keyboard { // Create Keyboard class to track key states
     LEFT = false;
     RIGHT = false;
     UP = false;
@@ -6,5 +6,4 @@ class Keyboard {
     SPACE = false;
     D = false;
     W = false;
-
 }

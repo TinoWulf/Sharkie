@@ -50,6 +50,7 @@ button:hover,
 #descriptionBtn:hover {
     transform: translateY(5px);
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
 }
 
 h1 {
@@ -90,7 +91,6 @@ h1 {
 }
 
 #rotateDevice {
-    position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
@@ -341,6 +341,10 @@ canvas.active {
     pointer-events: auto;
 }
 
+#touch-controls.hidden {
+    display: none !important;
+}
+
 
 @font-face {
     font-family: 'sharkie-font';
@@ -506,3 +510,50 @@ canvas.active {
         font-size: 10px;
     }
 }
+
+@media (hover: none) and (max-width: 766px) {
+    @media (orientation: portrait) {
+        #rotateDevice {
+            display: flex;
+        }
+        canvas {
+            display: none;
+        }
+        #touch-controls {
+            display: none;
+        }
+    }
+
+    @media (orientation: landscape) {
+        #rotateDevice {
+            display: none;
+        }
+        canvas.active {
+            display: flex;
+        }
+        #touch-controls {
+            display: flex;
+        }
+    }
+}
+
+@media (hover: none) and (min-width: 801px) {
+    #rotateDevice {
+        display: none;
+    }
+
+    canvas.active {
+        display: flex;
+    }
+
+    #touch-controls {
+        display: flex;
+    }
+}
+
+@media (hover: hover) {
+    #rotateDevice {
+        display: none;
+    }
+}
+

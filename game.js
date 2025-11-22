@@ -79,28 +79,53 @@ document.addEventListener('DOMContentLoaded', () => { // Update menu mute icon
 });
 
 
-
 window.addEventListener("orientationchange", checkOrientation);
 window.addEventListener("resize", checkOrientation);
+window.addEventListener("load", checkOrientation);
 
 
+/**
+ * Enhanced orientation + device-type handling.
+ * Smartphones must rotate to landscape,
+ * Tablets may remain in portrait and still play,
+ * Touch controls enabled on both when world exists.
+ */
 function checkOrientation() {
-    const rotateOverlay = document.getElementById("rotateDevice"); // Overlay element
-    if (window.matchMedia("(max-width: 768px)").matches || window.matchMedia("(max-height: 480px)").matches) { // Only for small screens
-        if (window.innerHeight > window.innerWidth) { // Portrait mode
-            rotateOverlay.style.display = "flex"; // Show overlay
-            if (canvas) canvas.style.display = "none"; // Hide canvas
-            document.getElementById('touch-controls').style.display = 'none'; // Hide touch controls
-        } else {
-            rotateOverlay.style.display = "none"; // Hide overlay
-            if (canvas) canvas.style.display = "flex"; // Show canvas
-            if (world) document.getElementById('touch-controls').style.display = 'flex'; // Show touch controls
-        }
+    const { rotateOverlay, touchControls, canvas, inMenu, isPhone, isTablet, isTouchDevice, portrait } = getOrientationState();
+    if (inMenu) {
+        rotateOverlay.style.display = "none"; touchControls.style.display = "none";
+        return;
     }
+    if (isTouchDevice && isPhone && portrait) {
+        rotateOverlay.style.display = "flex"; touchControls.style.display = "none"; canvas.style.display = "none";
+        return;
+    }
+    if (isTouchDevice) {
+        rotateOverlay.style.display = "none"; canvas.style.display = "flex"; touchControls.style.display = "flex";
+        return;
+    }
+    rotateOverlay.style.display = "none"; canvas.style.display = "flex"; touchControls.style.display = "none";
 }
 
 
-window.addEventListener('load', checkOrientation);
+/** * Retrieves the current orientation and device state.
+ * @return {{rotateOverlay:HTMLElement,touchControls:HTMLElement,canvas:HTMLElement,inMenu:boolean,isTouch:boolean,isPhone:boolean,portrait:boolean}}
+ **/
+function getOrientationState() {
+    const isPhone = window.innerWidth <= 766;
+    const isTablet = window.innerWidth > 766 && window.innerWidth <= 1400;
+    const hasTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    return {
+        rotateOverlay: document.getElementById("rotateDevice"),
+        touchControls: document.getElementById("touch-controls"),
+        canvas: document.getElementById("canvas"),
+        inMenu: !world,
+        isPhone,
+        isTablet,
+        isTouchDevice: hasTouch,
+        portrait: window.matchMedia("(orientation: portrait)").matches
+    };
+}
 
 
 /**
@@ -108,7 +133,7 @@ window.addEventListener('load', checkOrientation);
  * Called when the impressum button is clicked.
  **/
 function loadImpressum() {
-    const impressumDiv = document.getElementById('impressum'); 
+    const impressumDiv = document.getElementById('impressum');
     const impressumBtn = document.getElementById('impressumBtn');
     if (impressumDiv.style.display === 'none') { // If impressum is hidden
         showImpressum(impressumBtn, impressumDiv); // Show impressum
@@ -118,19 +143,21 @@ function loadImpressum() {
     impressumDiv.innerHTML = loadImpressumHtml(); // Load impressum content
 }
 
+
 /**
  * Shows the impressum section and hides other menu elements.
  * @param {HTMLElement} impressumBtn - The button that toggles the impressum.
  * @param {HTMLElement} impressumDiv - The div containing the impressum content.
  */
 function showImpressum(impressumBtn, impressumDiv) {
-    document.getElementById('startBtn').style.display = 'none'; 
+    document.getElementById('startBtn').style.display = 'none';
     document.getElementById('descriptionBtn').style.display = 'none';
     document.getElementById('startHeadline').style.display = 'none';
     document.getElementById('gameHeadline').style.display = 'none';
     impressumDiv.style.display = 'flex';
     impressumBtn.innerText = 'Close Impressum';
 }
+
 
 /** Hides the impressum section and shows other menu elements.
  * @param {HTMLElement} impressumBtn - The button that toggles the impressum.
@@ -144,6 +171,7 @@ function hideImpressum(impressumBtn, impressumDiv) {
     document.getElementById('startHeadline').style.display = 'flex';
     document.getElementById('gameHeadline').style.display = 'flex';
 }
+
 
 /** Starts a new game by initializing the world and canvas. */
 function startGame() {
@@ -163,6 +191,7 @@ function startGame() {
     syncWorldAudio(); // Sync audio states
     world.statusBar.find(s => s.type === "volume").setMuted(globalMuted); // Set volume mute state
     playBackgroundMusic(); // Play background music
+    checkOrientation(); // Check device orientation
 }
 
 
